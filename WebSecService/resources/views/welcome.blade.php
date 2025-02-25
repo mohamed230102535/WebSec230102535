@@ -33,6 +33,18 @@
             </ul>
         </div>
     </div>
+    <div class="card mt-4 shadow">
+        <div class="card-header bg-success text-white">
+            <h3>LAB Participation</h3>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                <li class="list-group-item"><a href="./minitest" class="text-decoration-none">miniTest Project</a></li>
+                <li class="list-group-item"><a href="./transcript" class="text-decoration-none">Transcript</a></li>
+
+            </ul>
+        </div>
+    </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
