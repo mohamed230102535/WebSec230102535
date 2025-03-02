@@ -1,26 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Supermarket Bill</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
- 
-</head>
-<body>
+@extends('layouts.master')
+@section('title', 'Supermarket Bill')
+@section('content')
 
-   
     <nav class="navbar navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">Supermarket Bill</a>
         </div>
     </nav>
 
-    <div class="container text-center mt-4">
-        <h2 class="fw-bold">Supermarket <span class="badge bg-secondary">Bill</span></h2>
-    </div>
-
-    
     <div class="container mt-4">
         <div class="bill-card">
             <table class="table table-striped table-hover">
@@ -56,7 +43,8 @@
             </table>
         </div>
     </div>
-
+    <div class="text-center mt-3">
+        <a href="/" class="btn btn-primary btn-lg">🏠 Back to Home</a>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+@endsection

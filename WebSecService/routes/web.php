@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('welcome');
@@ -8,6 +9,12 @@ Route::get('/', function () {
 
 Route::get('/ass1', function () {
     return view('ass1'); 
+   });
+
+Route::get('/test/{number?}', function (Request $request) {
+    $j =  $request-> number;
+    dd($request->all());
+    return view('test', compact('j')); 
    });
 
 
