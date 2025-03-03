@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Http\Controllers\web\ProductsController;
+use App\Http\Controllers\web\UsersController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -11,11 +13,23 @@ Route::get('/ass1', function () {
     return view('ass1'); 
    });
 
-Route::get('/test/{number?}', function (Request $request) {
-    $j =  $request-> number;
-    dd($request->all());
-    return view('test', compact('j')); 
-   });
+// Route::get('/test/{number?}', function ($number = null) {
+
+//     $j =   $number ?? 2;
+//     return view('test', compact('j')); 
+//    });
+
+Route::get('/test', function (Request $request) {
+$j =  $request->number??2;
+dd($request->all());
+
+return view('test', compact('j')); 
+});
+
+// Route::get('/test', function () {
+
+//     return view('test'); 
+//    });
 
 
    Route::get('/minitest', function () {
@@ -90,4 +104,17 @@ Route::get('/transcript', function () {
 });
 
 
-   
+
+
+Route::get('products', [ProductsController::class, 'list'])->name('products_list');
+
+
+
+
+
+Route::get('/users', [UsersController::class, 'index'])->name('users.index');
+Route::get('/users/create', [UsersController::class, 'create'])->name('users.create');
+Route::post('/users', [UsersController::class, 'store'])->name('users.store');
+Route::get('/users/{user}/edit', [UsersController::class, 'edit'])->name('users.edit');
+Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
+Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');

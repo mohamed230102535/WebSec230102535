@@ -142,3 +142,15 @@ If you visit `/multable`, it defaults to **2**.
 - The view (`multable.blade.php`) automatically receives and displays the data.
 
 Let me know if you need more explanation! 🚀
+
+
+
+when u use dd($request->all());
+this will be the output 
+dd($request->all());
+
+http://websecservice.local/test?number=4
+
+array:1 [▼ // routes\web.php:22
+  "number" => "4"
+]

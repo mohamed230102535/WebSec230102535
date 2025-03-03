@@ -45,6 +45,13 @@
         <div class="card-body">
             <ul class="list-group">
                 <li class="list-group-item"><a href="./test" class="text-decoration-none">Test web</a></li>
+                <li class="list-group-item">
+            <a href="{{ route('products_list') }}" class="text-decoration-none">Product Controller</a>
+                </li>
+                <li class="list-group-item">
+            <a href="{{ route('users.index') }}" class="text-decoration-none">UserCRUD</a>
+                </li>
+              
             </ul>
         </div>
     </div>
