@@ -34,7 +34,9 @@
             <ul class="list-group">
                 <li class="list-group-item"><a href="./minitest" class="text-decoration-none">miniTest Project</a></li>
                 <li class="list-group-item"><a href="./transcript" class="text-decoration-none">Transcript</a></li>
-
+                <li class="list-group-item">
+                    <a href="{{ route('users.index') }}" class="text-decoration-none">User CRUD</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -48,8 +50,10 @@
                 <li class="list-group-item">
             <a href="{{ route('products_list') }}" class="text-decoration-none">Product Controller</a>
                 </li>
+               
+
                 <li class="list-group-item">
-            <a href="{{ route('users.index') }}" class="text-decoration-none">UserCRUD</a>
+            <a href="{{ route('WebAuthentication.index') }}" class="text-decoration-none">Web Authentication</a>
                 </li>
               
             </ul>

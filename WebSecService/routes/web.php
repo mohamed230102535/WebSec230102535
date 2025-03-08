@@ -118,3 +118,14 @@ Route::post('/users', [UsersController::class, 'store'])->name('users.store');
 Route::get('/users/{user}/edit', [UsersController::class, 'edit'])->name('users.edit');
 Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
 Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
+
+
+//Web Authentication ===========================================================================================
+use App\Http\Controllers\Web\AuthController;
+
+Route::get('/WebAuthentication/login', [AuthController::class, 'login'])->name('WebAuthentication.login');
+Route::post('/WebAuthentication/login', [AuthController::class, 'doLogin'])->name('WebAuthentication.doLogin');
+Route::get('/WebAuthentication/register', [AuthController::class, 'register'])->name('WebAuthentication.register');
+Route::post('/WebAuthentication/register', [AuthController::class, 'doRegister'])->name('WebAuthentication.doRegister');
+Route::get('/WebAuthentication/logout', [AuthController::class, 'doLogout'])->name('WebAuthentication.logout');
+Route::get('/WebAuthentication', [AuthController::class, 'index'])->name('WebAuthentication.index');
