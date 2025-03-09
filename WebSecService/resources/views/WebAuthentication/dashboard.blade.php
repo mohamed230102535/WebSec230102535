@@ -1,9 +1,9 @@
 @extends("layouts.master2")
-@section("title", "OneHitPoint")
+@section("title", "User Management")
 @section("content")
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="#">
+    <a class="navbar-brand fw-bold" href="{{ route('WebAuthentication.index') }}">
       <i class="fas fa-gamepad me-2"></i>OneHitPoint
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -14,7 +14,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
-          <a class="nav-link active" href="#">
+          <a class="nav-link active" href="{{ route('WebAuthentication.index') }}">
             <i class="fas fa-home me-1"></i>Home
           </a>
         </li>
@@ -42,7 +42,7 @@
         </li>
       </ul>
 
-      <!-- Login Button -->
+      <!-- User Menu -->
       @auth
       <div class="d-flex align-items-center gap-3">
         <div class="dropdown">
@@ -78,8 +78,69 @@
         </a>
       </div>
       @endauth
-
     </div>
   </div>
 </nav>
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">User Management</h5>
+            <a href="{{ route('WebAuthentication.createUser') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i>Add New User
+            </a>
+        </div>
+        <div class="card-body">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($users as $user)
+                        <tr>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td>
+                                <span class="badge bg-{{ $user->role === 'admin' ? 'danger' : 'primary' }}">
+                                    {{ ucfirst($user->role) }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ route('WebAuthentication.editUser', $user->id) }}" class="btn btn-sm btn-warning me-1" title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ route('WebAuthentication.deleteUser', $user->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')" title="Delete User">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="text-center">No users found</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection

@@ -106,6 +106,7 @@ Route::get('/transcript', function () {
 
 
 
+
 Route::get('products', [ProductsController::class, 'list'])->name('products_list');
 
 
@@ -127,5 +128,19 @@ Route::get('/WebAuthentication/login', [AuthController::class, 'login'])->name('
 Route::post('/WebAuthentication/login', [AuthController::class, 'doLogin'])->name('WebAuthentication.doLogin');
 Route::get('/WebAuthentication/register', [AuthController::class, 'register'])->name('WebAuthentication.register');
 Route::post('/WebAuthentication/register', [AuthController::class, 'doRegister'])->name('WebAuthentication.doRegister');
-Route::get('/WebAuthentication/logout', [AuthController::class, 'doLogout'])->name('WebAuthentication.logout');
+Route::post('/WebAuthentication/logout', [AuthController::class, 'doLogout'])->name('WebAuthentication.doLogout');
 Route::get('/WebAuthentication', [AuthController::class, 'index'])->name('WebAuthentication.index');
+Route::get('/WebAuthentication/userAccount', [AuthController::class, 'userAccount'])->name('WebAuthentication.userAccount');
+Route::post('/WebAuthentication/updateUsername', [AuthController::class, 'updateUsername'])->name('WebAuthentication.updateUsername');
+Route::post('/WebAuthentication/updatePassword', [AuthController::class, 'updatePassword'])->name('WebAuthentication.updatePassword');
+Route::get('/WebAuthentication/forgotPassword', [AuthController::class, 'forgotPassword'])->name('WebAuthentication.forgotPassword');
+Route::post('/WebAuthentication/doResetPassword', [AuthController::class, 'doResetPassword'])->name('WebAuthentication.doResetPassword');
+Route::get('/WebAuthentication/dashboard', [AuthController::class, 'dashboard'])->name('WebAuthentication.dashboard');
+
+// User Management Routes
+
+Route::get('/WebAuthentication/users/create', [AuthController::class, 'createUser'])->name('WebAuthentication.createUser');
+Route::post('/WebAuthentication/users', [AuthController::class, 'storeUser'])->name('WebAuthentication.storeUser');
+Route::get('/WebAuthentication/users/{id}/edit', [AuthController::class, 'editUser'])->name('WebAuthentication.editUser');
+Route::put('/WebAuthentication/users/{id}', [AuthController::class, 'updateUser'])->name('WebAuthentication.updateUser');
+Route::delete('/WebAuthentication/users/{id}', [AuthController::class, 'deleteUser'])->name('WebAuthentication.deleteUser');
