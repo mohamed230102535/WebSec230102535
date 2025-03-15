@@ -2,6 +2,8 @@
 @section('title', 'Create User')
 @section('content')
 
+
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
   <div class="container">
     <a class="navbar-brand fw-bold" href="{{ route('WebAuthentication.index') }}">
@@ -47,7 +49,7 @@
             {{ Auth::user()->name }}
           </a>
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="userDropdown">
-            @if(Auth::user()->role === 'admin')
+            @if(Auth::user())
             <li><a class="dropdown-item" href="{{ route('WebAuthentication.dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
             <li><hr class="dropdown-divider"></li>
             @endif
@@ -68,6 +70,7 @@
     </div>
   </div>
 </nav>
+
 
 <div class="container mt-4">
     <div class="row justify-content-center">
@@ -107,18 +110,7 @@
                             @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label for="role" class="form-label">Role</label>
-                            <select class="form-select @error('role') is-invalid @enderror" 
-                                    id="role" name="role" required>
-                                <option value="">Select Role</option>
-                                <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
-                            </select>
-                            @error('role')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                  
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">

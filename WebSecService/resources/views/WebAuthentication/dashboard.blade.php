@@ -1,6 +1,8 @@
 @extends("layouts.master2")
 @section("title", "User Management")
 @section("content")
+
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
   <div class="container">
     <a class="navbar-brand fw-bold" href="{{ route('WebAuthentication.index') }}">
@@ -14,7 +16,7 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
-          <a class="nav-link active" href="{{ route('WebAuthentication.index') }}">
+          <a class="nav-link" href="{{ route('WebAuthentication.index') }}">
             <i class="fas fa-home me-1"></i>Home
           </a>
         </li>
@@ -35,11 +37,6 @@
             <li><a class="dropdown-item" href="#"><i class="fas fa-ellipsis-h me-2"></i>Something Else</a></li>
           </ul>
         </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" aria-disabled="true">
-            <i class="fas fa-ban me-1"></i>Disabled
-          </a>
-        </li>
       </ul>
 
       <!-- User Menu -->
@@ -51,7 +48,7 @@
             {{ Auth::user()->name }}
           </a>
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="userDropdown">
-            @if(Auth::user()->role === 'admin')
+            @if(Auth::user())
             <li><a class="dropdown-item" href="{{ route('WebAuthentication.dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
             <li><hr class="dropdown-divider"></li>
             @endif
@@ -68,27 +65,21 @@
           </ul>
         </div>
       </div>
-      @else
-      <div class="d-flex gap-2">
-        <a href="{{ route('WebAuthentication.login') }}" class="btn btn-outline-light px-4">
-          <i class="fas fa-sign-in-alt me-2"></i>Login
-        </a>
-        <a href="{{ route('WebAuthentication.register') }}" class="btn btn-primary px-4">
-          <i class="fas fa-user-plus me-2"></i>Register
-        </a>
-      </div>
       @endauth
     </div>
   </div>
 </nav>
 
+
 <div class="container mt-4">
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">User Management</h5>
+            @can('createUser')
             <a href="{{ route('WebAuthentication.createUser') }}" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus me-1"></i>Add New User
             </a>
+            @endcan
         </div>
         <div class="card-body">
             @if(session('success'))
@@ -104,7 +95,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Role</th>
+                        
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -113,22 +104,17 @@
                         <tr>
                             <td>{{ $user->name }}</td>
                             <td>{{ $user->email }}</td>
+                       
                             <td>
-                                <span class="badge bg-{{ $user->role === 'admin' ? 'danger' : 'primary' }}">
-                                    {{ ucfirst($user->role) }}
-                                </span>
-                            </td>
-                            <td>
+                              @can('editUser')
                                 <a href="{{ route('WebAuthentication.editUser', $user->id) }}" class="btn btn-sm btn-warning me-1" title="Edit User">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('WebAuthentication.deleteUser', $user->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')" title="Delete User">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                @endcan
+                                @can('deleteUser')
+                                <a href="{{ route('WebAuthentication.deleteUser', $user->id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')"> <i class="fas fa-trash"></i></a>
+                               @endcan
+      
                             </td>
                         </tr>
                         @empty

@@ -11,11 +11,33 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Artisan;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class AuthController extends Controller{
     use ValidatesRequests;
 
+    //     public function __construct()
+    // {
+    //     $this->middleware('auth:web')->except([
+    //         'list', 
+    //         'login', 
+    //         'register', 
+    //         'doLogin', 
+    //         'doRegister', 
+    //         'forgotPassword', 
+    //         'doResetPassword',
+    //         'index',
+    //         'dashboard',
+    //         'userAccount'
+    //     ]);
+    // }
+
+
     public function index(Request $request){
+ 
+
         return view('WebAuthentication.index');
     }
         
@@ -42,12 +64,9 @@ class AuthController extends Controller{
             return redirect()->back()->withInput($request->input())->withErrors(['Invalid login information.']);
         }
 
-        // Check user role and redirect accordingly
-        if (Auth::user()->role === 'admin') {
-            return redirect()->route('WebAuthentication.dashboard');
-        } else {
+    
             return redirect()->route('WebAuthentication.index');
-        }
+    
     }
     public function doRegister(Request $request){
         // Validate the request
@@ -69,7 +88,6 @@ class AuthController extends Controller{
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'role' => 'user'
         ]);
 
         return redirect()->route('WebAuthentication.login')
@@ -78,8 +96,19 @@ class AuthController extends Controller{
 
 
 //============================================================================================================
-    public function userAccount(Request $request){
-        return view('WebAuthentication.userAccount');
+    public function userAccount(Request $request,User $user = null){
+        $user = $user??auth()->user();
+        $permissions = [];
+      
+        foreach($user->roles as $role) {
+        foreach($role->permissions as $permission) {
+        $permissions[] = $permission;
+        }
+        }
+
+        return view('WebAuthentication.userAccount', compact('user', 'permissions'));
+
+       
     }
 
     public function updateUsername(Request $request){
@@ -114,7 +143,6 @@ class AuthController extends Controller{
             ->with('success', 'Password updated successfully. Please login with your new password.');
     }
 
-    // Shows the forgot password form view
     public function forgotPassword(Request $request){
         return view('WebAuthentication.forgetPassword');
     }
@@ -135,12 +163,10 @@ class AuthController extends Controller{
                     ->with('error', 'No account found with this email address.');
             }
 
-            // Then validate password
             $this->validate($request, [
                 'new_password' => 'required|min:6|confirmed',
             ]);
 
-            // Check if the email matches the currently logged in user
             if (Auth::check() && Auth::user()->email !== $request->email) {
                 return redirect()->back()
                     ->withInput()
@@ -162,6 +188,10 @@ class AuthController extends Controller{
 //============================================================================================================
 public function dashboard(Request $request)
 {
+    if (!auth()->user()->hasPermissionTo('dashboard')) {
+        abort(404);
+        }
+       
     $users = User::all();
     return view('WebAuthentication.dashboard', compact('users'));
 }
@@ -171,15 +201,34 @@ public function showUser($id) {
 }
 
 // Edit User
-public function editUser($id) // $id is the user ID from the database
+public function editUser($id) 
 {
-    // findOrFail will find user with matching ID or throw 404 if not found
-    $user = User::findOrFail($id); 
-    return view('WebAuthentication.users.edit', compact('user'));
+    $user = User::findOrFail($id);
+
+    if (auth()->id() != $user->id) {
+        abort_if(!auth()->user()->hasPermissionTo('editUser'), 404);
+    }
+
+    $roles = Role::all()->map(function ($role) use ($user) {
+        $role->taken = $user->hasRole($role->name);
+        return $role;
+    });
+
+    $directPermissionsIds = $user->permissions()->pluck('id')->toArray();
+    $permissions = Permission::all()->map(function ($permission) use ($directPermissionsIds) {
+        $permission->taken = in_array($permission->id, $directPermissionsIds);
+        return $permission;
+    });
+
+    return view('WebAuthentication.users.edit', compact('user', 'roles', 'permissions'));
 }
+
 // Create User
-public function createUser()
+public function createUser(Request $request, User $user = null)
 {
+    if(auth()->id()!=$user?->id) {
+    if(!auth()->user()->hasPermissionTo('createUser')) abort(404);
+    }
     return view('WebAuthentication.users.create');
 }
 
@@ -190,14 +239,12 @@ public function storeUser(Request $request)
         'name' => 'required|string|min:3',
         'email' => 'required|email|unique:users',
         'password' => 'required|min:6',
-        'role' => 'required|in:admin,user'
     ]);
 
     User::create([
         'name' => $request->name,
         'email' => $request->email,
         'password' => bcrypt($request->password),
-        'role' => $request->role
     ]);
 
     return redirect()->route('WebAuthentication.dashboard')
@@ -208,36 +255,40 @@ public function storeUser(Request $request)
 // Update User 
 public function updateUser(Request $request, $id) // $id is user ID to update
 {
-    // Find user by ID or throw 404
+   
     $user = User::findOrFail($id);
 
     $request->validate([
         'name' => 'required|string|min:3',
         'email' => 'required|email|unique:users,email,' , 
-        'role' => 'required|in:admin,user'
+     
     ]);
 
     $userData = [
         'name' => $request->name,
         'email' => $request->email,
-        'role' => $request->role
     ];
 
     if ($request->filled('password')) {
         $userData['password'] = bcrypt($request->password);
     }
-
+    $user->syncRoles($request->roles);
+    $user->syncPermissions($request->permissions);
+   
     $user->update($userData);
-
+    Artisan::call('cache:clear');
     return redirect()->route('WebAuthentication.dashboard')
         ->with('success', 'User updated successfully');
 }
 
-// Delete User
-public function deleteUser($id) // $id is user ID to delete
+
+public function deleteUser($id)
 {
-    // Find user by ID or throw 404
-    $user = User::findOrFail($id);
+    if (!auth()->user()->hasPermissionTo('deleteUser')) {
+        abort(401);
+        }
+
+    $user = User::findOrFail($id); 
     $user->delete();
 
     return redirect()->route('WebAuthentication.dashboard')

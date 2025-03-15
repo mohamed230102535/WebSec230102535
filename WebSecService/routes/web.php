@@ -141,6 +141,6 @@ Route::get('/WebAuthentication/dashboard', [AuthController::class, 'dashboard'])
 
 Route::get('/WebAuthentication/users/create', [AuthController::class, 'createUser'])->name('WebAuthentication.createUser');
 Route::post('/WebAuthentication/users', [AuthController::class, 'storeUser'])->name('WebAuthentication.storeUser');
-Route::get('/WebAuthentication/users/{id}/edit', [AuthController::class, 'editUser'])->name('WebAuthentication.editUser');
-Route::put('/WebAuthentication/users/{id}', [AuthController::class, 'updateUser'])->name('WebAuthentication.updateUser');
-Route::delete('/WebAuthentication/users/{id}', [AuthController::class, 'deleteUser'])->name('WebAuthentication.deleteUser');
+Route::get('/WebAuthentication/users/edit/{id}', [AuthController::class, 'editUser'])->name('WebAuthentication.editUser');
+Route::put('/WebAuthentication/update/{id}', [AuthController::class, 'updateUser'])->name('WebAuthentication.updateUser');
+Route::get('/WebAuthentication/delate/{id}', [AuthController::class, 'deleteUser'])->name('WebAuthentication.deleteUser');

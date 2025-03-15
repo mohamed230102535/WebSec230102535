@@ -51,10 +51,10 @@
             {{ Auth::user()->name }}
           </a>
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="userDropdown">
-            @if(Auth::user()->role === 'admin')
+            @can("dashboard")
             <li><a class="dropdown-item" href="{{ route('WebAuthentication.dashboard') }}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
             <li><hr class="dropdown-divider"></li>
-            @endif
+            @endcan
             <li><a class="dropdown-item" href="{{ route('WebAuthentication.userAccount') }}"><i class="fas fa-user-cog me-2"></i>My Account</a></li>
             <li><hr class="dropdown-divider"></li>
             <li>
