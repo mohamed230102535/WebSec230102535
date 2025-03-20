@@ -1,21 +1,6 @@
 @extends("layouts.master2")
 @section("title", "Register - OneHitPoint")
 @section("content")
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="#">
-      <i class="fas fa-gamepad me-2"></i>OneHitPoint
-    </a>
-    <div class="d-flex gap-2">
-      <a href="{{ route('WebAuthentication.login') }}" class="btn btn-outline-light px-4">
-        <i class="fas fa-sign-in-alt me-2"></i>Login
-      </a>
-      <a href="{{ route('WebAuthentication.register') }}" class="btn btn-primary px-4 active">
-        <i class="fas fa-user-plus me-2"></i>Register
-      </a>
-    </div>
-  </div>
-</nav>
 
 <div class="d-flex justify-content-center align-items-center vh-100" style="background-color: #f8f9fa;">
     <div class="card shadow-lg p-4" style="width: 350px; border-radius: 15px;">
@@ -31,7 +16,7 @@
                 @endforeach
             </div>
             @endif
-
+            
             @if($errors->has('email'))
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>

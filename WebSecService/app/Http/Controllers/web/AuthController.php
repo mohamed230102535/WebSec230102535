@@ -36,7 +36,6 @@ class AuthController extends Controller{
 
 
     public function index(Request $request){
- 
 
         return view('WebAuthentication.index');
     }
@@ -96,7 +95,7 @@ class AuthController extends Controller{
 
 
 //============================================================================================================
-    public function userAccount(Request $request,User $user = null){
+    public function userAccount(){
         $user = $user??auth()->user();
         $permissions = [];
       
@@ -191,8 +190,17 @@ public function dashboard(Request $request)
     if (!auth()->user()->hasPermissionTo('dashboard')) {
         abort(404);
         }
+        
+        $query = User::query();
+
+        if ($keywords = $request->input('keywords')) {
+            $query->where('name', 'like', "%{$keywords}%")
+                  ->orWhere('email', 'like', "%{$keywords}%");
+        }
+
+        $users = $query->get();
        
-    $users = User::all();
+   
     return view('WebAuthentication.dashboard', compact('users'));
 }
 public function showUser($id) {
