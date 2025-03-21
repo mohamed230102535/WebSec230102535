@@ -24,12 +24,18 @@ class ProductsController extends Controller {
 
         public function create()
     {
+        if (!auth()->user()->hasPermissionTo('create')) {
+            abort(404);
+            }
         return view('WebAuthentication.products.productAdd');
     }
   
 
     public function edit(Product $product)
     {
+        if (!auth()->user()->hasPermissionTo('edit')) {
+            abort(404);
+            }
         return view('WebAuthentication.products.productEdit', compact('product'));
     }
 
@@ -41,11 +47,11 @@ class ProductsController extends Controller {
             'code' => 'required|string|max:10',
             'name' => 'required|string|max:255',
             'model' => 'required|string|max:50',
-            'photo' => 'required|image|max:2048', // Assuming photo upload
+            'photo' => 'required|image|max:2048', 
             'description' => 'nullable|string',
         ]);
 
-        // Handle photo upload
+       
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('products', 'public');
             $validated['photo'] = $path;
@@ -82,7 +88,9 @@ class ProductsController extends Controller {
     }
     public function delete(Product $product)
     {
-        // Delete photo if exists
+        if (!auth()->user()->hasPermissionTo('delete')) {
+            abort(404);
+            }
         if ($product->photo && \Storage::disk('public')->exists($product->photo)) {
             \Storage::disk('public')->delete($product->photo);
         }

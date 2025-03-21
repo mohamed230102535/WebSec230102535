@@ -57,6 +57,9 @@
             <li><a class="dropdown-item dropdown-item-cool" href="{{ route('WebAuthentication.userAccount') }}">
               <i class="fas fa-user-cog me-2"></i>My Account</a></li>
             <li><hr class="dropdown-divider bg-danger"></li>
+            <li><a class="dropdown-item dropdown-item-cool" href="{{ route('quiz.MyQuizzes') }}">
+              <i class="fas fa-user-cog me-2"></i>My Quizzes</a></li>
+            <li><hr class="dropdown-divider bg-danger"></li>
             <li>
               <form action="{{ route('WebAuthentication.doLogout') }}" method="POST">
                 @csrf

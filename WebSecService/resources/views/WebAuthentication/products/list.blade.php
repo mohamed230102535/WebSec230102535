@@ -35,11 +35,14 @@
 <section class="py-5 flex-grow-1" style="background: #1a1a1a; min-height: calc(100vh - 300px);">
   <div class="container">
     <!-- Add Product Button -->
+     @can('create')
     <div class="text-end mb-4">
+    
       <a href="{{ route('WebAuthentication.products.create') }}" class="btn btn-warning btn-cool px-4">
         <i class="fas fa-plus me-2"></i>Add New Product
       </a>
     </div>
+    @endcan
 
     @if($products->isEmpty())
       <div class="text-center text-white">
@@ -58,13 +61,17 @@
                 <p class="card-text text-muted">Model: {{ $product->model }}</p>
                 <p class="card-text flex-grow-1">{{ Str::limit($product->description, 100) }}</p>
                 <div class="d-flex gap-2 mt-auto">
+                  @can('edit', $product)
                   <a href="{{ route('WebAuthentication.products.edit', $product->id) }}" class="btn btn-outline-warning btn-cool flex-grow-1">
                     <i class="fas fa-edit me-2"></i>Edit
                   </a>
+                  @endcan
+                  @can('delete', $product)
                   <a href="{{ route('WebAuthentication.products.delete', $product->id) }}" class="btn btn-outline-danger btn-cool flex-grow-1" 
                      onclick="return confirm('Are you sure you want to delete {{ $product->name }}?');">
                     <i class="fas fa-trash me-2"></i>Delete
                   </a>
+                  @endcan
                 </div>
               </div>
             </div>

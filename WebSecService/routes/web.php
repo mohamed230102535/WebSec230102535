@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\web\ProductsController;
 use App\Http\Controllers\web\UsersController;
+use App\Http\Controllers\Web\AuthController;
+use App\Http\Controllers\Web\QuizController;
+use App\Mail\VerificationEmail;
 
 Route::get('/', function () {
     return view('welcome');
@@ -122,7 +125,6 @@ Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users
 
 
 //Web Authentication ===========================================================================================
-use App\Http\Controllers\Web\AuthController;
 
 Route::get('/WebAuthentication', [AuthController::class, 'index'])->name('WebAuthentication.index');
 
@@ -132,6 +134,16 @@ Route::get('/WebAuthentication/register', [AuthController::class, 'register'])->
 Route::post('/WebAuthentication/register', [AuthController::class, 'doRegister'])->name('WebAuthentication.doRegister');
 Route::post('/WebAuthentication/logout', [AuthController::class, 'doLogout'])->name('WebAuthentication.doLogout');
 Route::get('/WebAuthentication', [AuthController::class, 'index'])->name('WebAuthentication.index');
+
+///verify
+
+
+
+Route::get('/testRoute', function(){
+    $name = 'testRoute';
+    Mail::to('m7md1hp@gmail.com')->send(new VerificationEmail($name));
+});
+
 
 // User Account Routes
 
@@ -157,7 +169,11 @@ Route::get('/WebAuthentication/products/create', [ProductsController::class, 'cr
 Route::get('/WebAuthentication/products/edit/{product}', [ProductsController::class, 'edit'])->name('WebAuthentication.products.edit');
 Route::post('/WebAuthentication/products/create', [ProductsController::class, 'doCreate'])->name('WebAuthentication.products.doCreate');
 Route::get('/WebAuthentication/products/delete/{product}', [ProductsController::class, 'delete'])->name('WebAuthentication.products.delete');
-Route::post('/WebAuthentication/products/edit/{product}', [ProductsController::class, 'doEdit'])->name('WebAuthentication.products.doEdit')->middleware('auth');
+Route::post('/WebAuthentication/products/edit/{product}', [ProductsController::class, 'doEdit'])->name('WebAuthentication.products.doEdit');
 // Quiz Management Routes
 
 Route::get('/WebAuthentication/quiz', [QuizController::class, 'quiz'])->name('WebAuthentication.quiz');
+Route::get('/WebAuthentication/quiz/{id}', [QuizController::class, 'show'])->name('quiz.show');
+Route::post('/WebAuthentication/quiz/{id}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
+Route::get('/WebAuthentication/quiz/{id}/result', [QuizController::class, 'result'])->name('quiz.result');
+Route::get('/WebAuthentication/myQuiz', [QuizController::class, 'myQuizzes'])->name('quiz.MyQuizzes');

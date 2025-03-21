@@ -14,6 +14,9 @@ use Carbon\Carbon;
 use Artisan;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Crypt;
+use App\Mail\VerificationEmail;
+
 
 class AuthController extends Controller{
     use ValidatesRequests;
@@ -58,40 +61,77 @@ class AuthController extends Controller{
             'email' => 'required|email',
             'password' => 'required|min:6'
         ]);
-
-        if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+    
+        $user = User::where('email', $request->email)->first();
+    
+        if (!$user || !Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             return redirect()->back()->withInput($request->input())->withErrors(['Invalid login information.']);
         }
-
     
-            return redirect()->route('WebAuthentication.index');
+        // if (!$user->email_verified_at) {
+        //     Auth::logout();
+        //     return redirect()->route('WebAuthentication.login')->withErrors(['Your email is not verified. Please check your email.']);
+        // }
     
+        return redirect()->route('WebAuthentication.index');
     }
+    
+    
     public function doRegister(Request $request){
         // Validate the request
-        $this->validate($request,[
+        $this->validate($request, [
             'name' => 'required|string|min:5',
             'email' => 'required|email',
             'password' => 'required|min:6|confirmed'
         ]);
-
-        // Check if email already exists
+    
+      
         if (User::where('email', $request->email)->exists()) {
             return redirect()->back()
                 ->withInput($request->except('password', 'password_confirmation'))
                 ->withErrors(['email' => 'This email is already registered. Please login or reset your password.']);
         }
-
-        // Create new user
-        User::create([
+        
+    
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
-
+    
+       
+        // $token = Crypt::encryptString(json_encode(['id' => $user->id, 'email' => $user->email]));
+        // $link = route("verify", ['token' => $token]);
+        // Mail::to($user->email)->send(new VerificationEmail($link, $user->name));
+    
         return redirect()->route('WebAuthentication.login')
-            ->with('success', 'Registration successful! Please login.');
+            ->with('success', 'Registration successful! Please check your email to verify your account.');
+
     }
+
+    // public function verify(Request $request) {
+    //     try {
+    //         $decryptedData = json_decode(Crypt::decryptString($request->token), true);
+    //         $user = User::find($decryptedData['id']);
+    
+    //         if (!$user) {
+    //             abort(401, 'Invalid verification link.');
+    //         }
+    
+    //         if ($user->email_verified_at) {
+    //             return redirect()->route('WebAuthentication.login')->with('info', 'Your email is already verified.');
+    //         }
+    
+    //         // Mark user as verified
+    //         $user->email_verified_at = Carbon::now();
+    //         $user->save();
+    
+    //         return redirect()->route('WebAuthentication.login')->with('success', 'Email verified successfully! You can now log in.');
+    //     } catch (\Exception $e) {
+    //         return redirect()->route('WebAuthentication.login')->withErrors(['error' => 'Invalid or expired verification link.']);
+    //     }
+    // }
+       
 
 
 //============================================================================================================
@@ -203,10 +243,7 @@ public function dashboard(Request $request)
    
     return view('WebAuthentication.dashboard', compact('users'));
 }
-public function showUser($id) {
-    $user = User::findOrFail($id);
-    return view('WebAuthentication.users.show', compact('user')); 
-}
+
 
 // Edit User
 public function editUser($id) 
