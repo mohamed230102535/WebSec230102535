@@ -1,7 +1,7 @@
 @extends("layouts.master2")
 @section("title", "Products - OneHitPoint")
 @section("content")
-
+@auth
 <!-- Products Header -->
 <section class="py-5 text-white" style="background: linear-gradient(45deg, #2c0b0e, #4a1a1e); position: relative; overflow: hidden;">
   <div class="container text-center position-relative z-index-1">
@@ -11,6 +11,14 @@
     <p class="lead" style="color: #ffffff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);">
       Discover Our Cutting-Edge PC Products
     </p>
+    <div class="mt-3">
+      <span class="badge bg-warning text-dark fs-5 me-3">
+        <i class="fas fa-coins me-2"></i>Your Credit Balance: {{ number_format(Auth::user()->credit, 2) }} credits
+      </span>
+      <a href="{{ route('WebAuthentication.products.history') }}" class="btn btn-outline-warning btn-cool">
+        <i class="fas fa-history me-2"></i> Purchase History
+      </a>
+    </div>
   </div>
   <div class="header-bg-effect" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(212, 163, 115, 0.1) 0%, rgba(44, 11, 14, 0.8) 80%); opacity: 0.7;"></div>
 </section>
@@ -62,18 +70,38 @@
                 <h5 class="card-title fw-bold" style="color: #d4a373; text-shadow: 0 0 8px rgba(212, 163, 115, 0.5);">{{ $product->name }}</h5>
                 <p class="card-text text-muted">Model: {{ $product->model }}</p>
                 <p class="card-text flex-grow-1" style="color: rgba(255, 255, 255, 0.8);">{{ Str::limit($product->description, 100) }}</p>
+                <div class="mt-2 mb-3">
+                    <span class="badge bg-warning text-dark me-2">Price: {{ number_format($product->price, 2) }} credits</span>
+                    <span class="badge {{ $product->stock > 0 ? 'bg-success' : 'bg-danger' }}">
+                        Stock: {{ $product->stock }}
+                    </span>
+                </div>
                 <div class="d-flex gap-2 mt-auto">
-                  @can('edit', $product)
-                  <a href="{{ route('WebAuthentication.products.edit', $product->id) }}" class="btn btn-outline-warning btn-cool flex-grow-1 glowing-btn">
-                    <i class="fas fa-edit me-2"></i> Edit
-                  </a>
-                  @endcan
-                  @can('delete', $product)
-                  <a href="{{ route('WebAuthentication.products.delete', $product->id) }}" class="btn btn-outline-danger btn-cool flex-grow-1 glowing-btn" 
-                    onclick="return confirm('Are you sure you want to delete {{ $product->name }}?');">
-                    <i class="fas fa-trash me-2"></i> Delete
-                  </a>
-                  @endcan
+                    @if($product->stock > 0)
+                        @if(Auth::user()->credit >= $product->price)
+                            <form action="{{ route('WebAuthentication.products.purchase', $product->id) }}" method="POST" class="flex-grow-1">
+                                @csrf
+                                <button type="submit" class="btn btn-success btn-cool w-100 glowing-btn">
+                                    <i class="fas fa-shopping-cart me-2"></i> Purchase
+                                </button>
+                            </form>
+                        @else
+                            <button type="button" class="btn btn-danger btn-cool w-100 glowing-btn" disabled>
+                                <i class="fas fa-exclamation-circle me-2"></i> Insufficient Credit
+                            </button>
+                        @endif
+                    @endif
+                    @can('edit', $product)
+                    <a href="{{ route('WebAuthentication.products.edit', $product->id) }}" class="btn btn-outline-warning btn-cool flex-grow-1 glowing-btn">
+                        <i class="fas fa-edit me-2"></i> Edit
+                    </a>
+                    @endcan
+                    @can('delete', $product)
+                    <a href="{{ route('WebAuthentication.products.delete', $product->id) }}" class="btn btn-outline-danger btn-cool flex-grow-1 glowing-btn" 
+                        onclick="return confirm('Are you sure you want to delete {{ $product->name }}?');">
+                        <i class="fas fa-trash me-2"></i> Delete
+                    </a>
+                    @endcan
                 </div>
                 <!-- Neon Glow Effect -->
                 <span class="glow-effect"></span>
@@ -85,6 +113,9 @@
     @endif
   </div>
 </section>
+@else
+<h1>your not loged in</h1>
+@endauth
 
 <!-- Custom Styles -->
 <style>

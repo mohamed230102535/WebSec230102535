@@ -11,7 +11,7 @@ use App\Mail\VerificationEmail;
 Route::get('/', function () {
     return view('welcome');
 });
-
+        
 Route::get('/ass1', function () {
     return view('ass1'); 
    });
@@ -144,6 +144,7 @@ Route::post('/WebAuthentication/updateUsername', [AuthController::class, 'update
 Route::post('/WebAuthentication/updatePassword', [AuthController::class, 'updatePassword'])->name('WebAuthentication.updatePassword');
 Route::get('/WebAuthentication/forgotPassword', [AuthController::class, 'forgotPassword'])->name('WebAuthentication.forgotPassword');
 Route::post('/WebAuthentication/doResetPassword', [AuthController::class, 'doResetPassword'])->name('WebAuthentication.doResetPassword');
+Route::post('/WebAuthentication/addCredit', [AuthController::class, 'addCredit'])->name('WebAuthentication.addCredit');
 
 // User Management Routes
 
@@ -162,7 +163,8 @@ Route::get('/WebAuthentication/products/edit/{product}', [ProductsController::cl
 Route::post('/WebAuthentication/products/create', [ProductsController::class, 'doCreate'])->name('WebAuthentication.products.doCreate');
 Route::get('/WebAuthentication/products/delete/{product}', [ProductsController::class, 'delete'])->name('WebAuthentication.products.delete');
 Route::post('/WebAuthentication/products/edit/{product}', [ProductsController::class, 'doEdit'])->name('WebAuthentication.products.doEdit');
-
+Route::post('/WebAuthentication/products/purchase/{product}', [ProductsController::class, 'purchase'])->name('WebAuthentication.products.purchase');
+Route::get('/WebAuthentication/products/history', [ProductsController::class, 'purchaseHistory'])->name('WebAuthentication.products.history');
 // Quiz Management Routes
 
 Route::get('/WebAuthentication/quiz', [QuizController::class, 'quiz'])->name('WebAuthentication.quiz');

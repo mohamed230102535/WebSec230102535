@@ -88,6 +88,26 @@
                 @enderror
               </div>
 
+              <!-- Price -->
+              <div class="mb-3">
+                <label for="price" class="form-label" style="color: #d4a373;">Price (credits)</label>
+                <input type="number" class="form-control bg-dark text-white border-danger" id="price" name="price" 
+                       value="{{ old('price', $product->price) }}" step="0.01" min="0" required>
+                @error('price')
+                  <span class="text-danger">{{ $message }}</span>
+                @enderror
+              </div>
+
+              <!-- Stock -->
+              <div class="mb-3">
+                <label for="stock" class="form-label" style="color: #d4a373;">Stock Quantity</label>
+                <input type="number" class="form-control bg-dark text-white border-danger" id="stock" name="stock" 
+                       value="{{ old('stock', $product->stock) }}" min="0" required>
+                @error('stock')
+                  <span class="text-danger">{{ $message }}</span>
+                @enderror
+              </div>
+
               <!-- Submit Button -->
               <div class="text-end">
                 <button type="submit" class="btn btn-danger btn-cool px-4">

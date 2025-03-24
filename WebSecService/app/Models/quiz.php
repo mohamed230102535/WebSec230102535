@@ -23,7 +23,7 @@ class quiz extends Model {
 
     public function createdBy()
     {
-        return $this->belongsTo(UsersDB::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
 }

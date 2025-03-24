@@ -1,7 +1,7 @@
 @extends("layouts.master2")
 @section("title", "Quiz - OneHitPoint")
 @section("content")
-
+@auth
 <!-- Header Section -->
 <section class="py-5 text-white" style="background: linear-gradient(45deg, #2c0b0e, #4a1a1e); position: relative; overflow: hidden;">
   <div class="container text-center position-relative z-index-1">
@@ -64,6 +64,9 @@
     </div>
   </div>
 </section>
+@else 
+<h1>Your not loged in</h1>
+@endauth
 
 <!-- Custom Styles -->
 <style>

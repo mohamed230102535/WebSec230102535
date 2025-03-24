@@ -9,7 +9,11 @@
       <i class="fas fa-users me-2"></i>User Management
     </h1>
     <p class="lead" style="color: #ffffff;">
-      Manage Your OneHitPoint Community
+      @if(auth()->user()->hasRole('Admin'))
+        Manage Your OneHitPoint Community
+      @else
+        Customer Management
+      @endif
     </p>
   </div>
 </section>
@@ -36,12 +40,18 @@
   <div class="container">
     <div class="card bg-dark text-white border-0 shadow-lg animate__animated animate__fadeIn">
       <div class="card-header d-flex justify-content-between align-items-center" style="background: #2c0b0e; border-bottom: 2px solid #d4a373;">
-        <h5 class="mb-0" style="color: #d4a373;">User List</h5>
-        @can('createUser')
+        <h5 class="mb-0" style="color: #d4a373;">
+          @if(auth()->user()->hasRole('Admin'))
+            User List
+          @else
+            Customer List
+          @endif
+        </h5>
+        @if(auth()->user()->hasRole('Admin'))
           <a href="{{ route('WebAuthentication.createUser') }}" class="btn btn-warning btn-cool btn-sm">
             <i class="fas fa-plus me-1"></i>Add New User
           </a>
-        @endcan
+        @endif
       </div>
       <div class="card-body">
         @if(session('success'))
@@ -57,33 +67,45 @@
               <tr style="background: #4a1a1e;">
                 <th>Name</th>
                 <th>Email</th>
+                <th>Credit Balance</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               @forelse($users as $user)
-                <tr class="user-row">
-                  <td>{{ $user->name }}</td>
-                  <td>{{ $user->email }}</td>
-                  <td>
-                    @if(auth()->id() != $user->id && $user->id != 1)
-                      @can('editUser')
-                        <a href="{{ route('WebAuthentication.editUser', $user->id) }}" class="btn btn-sm btn-outline-warning btn-cool me-1" title="Edit User">
-                          <i class="fas fa-edit"></i>
-                        </a>
-                      @endcan
-                      @can('deleteUser')
-                        <a href="{{ route('WebAuthentication.deleteUser', $user->id) }}" class="btn btn-sm btn-outline-danger btn-cool" 
-                           onclick="return confirm('Are you sure you want to delete {{ $user->name }}?');" title="Delete User">
-                          <i class="fas fa-trash"></i>
-                        </a>
-                      @endcan
-                    @endif
-                  </td>
-                </tr>
+                @if(auth()->user()->hasRole('Admin') || ($user->hasRole('Customer')))
+                  <tr class="user-row">
+                    <td>{{ $user->name }}</td>
+                    <td>{{ $user->email }}</td>
+                    <td>{{ number_format($user->credit, 2) }} credits</td>
+                    <td>
+                      @if(auth()->user()->hasRole('Admin'))
+                        @if(auth()->id() != $user->id && $user->id != 1)
+                          @can('editUser')
+                            <a href="{{ route('WebAuthentication.editUser', $user->id) }}" class="btn btn-sm btn-outline-warning btn-cool me-1" title="Edit User">
+                              <i class="fas fa-edit"></i>
+                            </a>
+                          @endcan
+                          @can('deleteUser')
+                            <a href="{{ route('WebAuthentication.deleteUser', $user->id) }}" class="btn btn-sm btn-outline-danger btn-cool" 
+                               onclick="return confirm('Are you sure you want to delete {{ $user->name }}?');" title="Delete User">
+                              <i class="fas fa-trash"></i>
+                            </a>
+                          @endcan
+                        @endif
+                      @else
+                        @if($user->hasRole('Customer'))
+                          <a href="{{ route('WebAuthentication.editUser', $user->id) }}" class="btn btn-sm btn-outline-warning btn-cool" title="Add Credit">
+                          <i class="fas fa-user-edit"></i> Edit User
+                          </a>
+                        @endif
+                      @endif
+                    </td>
+                  </tr>
+                @endif
               @empty
                 <tr>
-                  <td colspan="3" class="text-center text-muted">No users found</td>
+                  <td colspan="4" class="text-center text-muted">No users found</td>
                 </tr>
               @endforelse
             </tbody>

@@ -66,8 +66,37 @@
                     @endif
                   </td>
                 </tr>
+                <tr>
+                  <th style="color: #d4a373; border-bottom: 1px solid #d71818;">Credit Balance</th>
+                  <td>
+                    <span class="badge" style="background: #d4a373; color: #2c0b0e; font-size: 1.1em;">
+                      <i class="fas fa-coins me-1"></i>{{ number_format($user->credit, 2) }} credits
+                    </span>
+                  </td>
+                </tr>
               </tbody>
             </table>
+
+            <!-- Add Credit Form -->
+            <div class="mb-4">
+              <h5 style="color: #d4a373;">Add Credit</h5>
+              <form action="{{ route('WebAuthentication.addCredit') }}" method="POST">
+                @csrf
+                <div class="input-group">
+                  <input type="number" class="form-control bg-dark text-white border-danger" name="amount" 
+                         placeholder="Enter amount" step="0.01" min="0.01" required>
+                  <span class="input-group-text" style="background: #2c0b0e; color: #d4a373; border-color: #d71818;">
+                    credits
+                  </span>
+                </div>
+                @error('amount')
+                  <span class="text-danger">{{ $message }}</span>
+                @enderror
+                <button type="submit" class="btn btn-danger btn-cool mt-2">
+                  <i class="fas fa-plus-circle me-2"></i>Add Credit
+                </button>
+              </form>
+            </div>
 
             <!-- Update Username Form -->
             <div class="mb-4">

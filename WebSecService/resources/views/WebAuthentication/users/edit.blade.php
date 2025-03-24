@@ -17,7 +17,6 @@
                 <div class="card-body p-4">
                     <form method="POST" action="{{ route('WebAuthentication.updateUser', $user->id) }}">
                         @csrf
-                       <!-- Added for proper update routing -->
 
                         <div class="mb-4">
                             <label for="name" class="form-label text-gold fw-bold">Name</label>
@@ -46,21 +45,30 @@
                             @enderror
                         </div>
 
-                        <div class="mb-4">
-                            <label for="roles" class="form-label text-gold fw-bold">Roles</label>
-                            <select multiple class="form-select glowing-input @error('roles') is-invalid @enderror" name="roles[]">
-                                @foreach($roles as $role)
-                                    <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
-                                        {{ $role->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('roles')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
                         @if(auth()->user()->hasRole('Admin'))
+                            <div class="mb-4">
+                                <label for="credit" class="form-label text-gold fw-bold">Credit Balance</label>
+                                <input type="number" step="0.01" class="form-control glowing-input @error('credit') is-invalid @enderror" 
+                                       id="credit" name="credit" value="{{ old('credit', $user->credit) }}" required>
+                                @error('credit')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="roles" class="form-label text-gold fw-bold">Roles</label>
+                                <select multiple class="form-select glowing-input @error('roles') is-invalid @enderror" name="roles[]">
+                                    @foreach($roles as $role)
+                                        <option value="{{ $role->name }}" {{ $user->hasRole($role->name) ? 'selected' : '' }}>
+                                            {{ $role->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('roles')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="mb-4">
                                 <label for="permissions" class="form-label text-gold fw-bold">Direct Permissions</label>
                                 <select multiple class="form-select glowing-input @error('permissions') is-invalid @enderror" name="permissions[]">
@@ -74,6 +82,18 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+                        @else
+                            @if($user->hasRole('Customer'))
+                                <div class="mb-4">
+                                    <label for="credit_adjustment" class="form-label text-gold fw-bold">Add Credit</label>
+                                    <input type="number" step="0.01" min="0" class="form-control glowing-input @error('credit_adjustment') is-invalid @enderror" 
+                                           id="credit_adjustment" name="credit_adjustment" value="{{ old('credit_adjustment', 0) }}" required>
+                                    <small class="text-muted">Enter a positive value to add credit to the customer's account.</small>
+                                    @error('credit_adjustment')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @endif
                         @endif
 
                         <div class="d-grid gap-3">
@@ -185,7 +205,6 @@
 </style>
 
 <!-- Scripts -->
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {

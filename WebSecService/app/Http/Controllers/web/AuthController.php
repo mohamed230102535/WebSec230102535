@@ -76,6 +76,9 @@ class AuthController extends Controller{
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
+
+        // Assign Customer role by default
+        $user->assignRole('Customer');
     
         return redirect()->route('WebAuthentication.login')
             ->with('success', 'Registration successful! Please check your email to verify your account.');
@@ -255,13 +258,12 @@ public function storeUser(Request $request)
 // Update User 
 public function updateUser(Request $request, $id) // $id is user ID to update
 {
-   
     $user = User::findOrFail($id);
 
+    // Basic validation
     $request->validate([
         'name' => 'required|string|min:3',
-        'email' => 'required|email|unique:users,email,' , 
-     
+        'email' => 'required|email|unique:users,email,' . $id,
     ]);
 
     $userData = [
@@ -272,11 +274,27 @@ public function updateUser(Request $request, $id) // $id is user ID to update
     if ($request->filled('password')) {
         $userData['password'] = bcrypt($request->password);
     }
-    $user->syncRoles($request->roles);
-    $user->syncPermissions($request->permissions);
+
+    // Handle credit adjustments based on user role
+    if (auth()->user()->hasRole('Admin')) {
+        if ($request->has('credit')) {
+            $userData['credit'] = $request->credit;
+        }
+        $user->syncRoles($request->roles);
+        $user->syncPermissions($request->permissions);
+    } else {
+        // For employees, only allow adding positive credit to customers
+        if ($user->hasRole('Customer') && $request->has('credit_adjustment')) {
+            $creditAdjustment = floatval($request->credit_adjustment);
+            if ($creditAdjustment > 0) {
+                $userData['credit'] = $user->credit + $creditAdjustment;
+            }
+        }
+    }
    
     $user->update($userData);
     Artisan::call('cache:clear');
+    
     return redirect()->route('WebAuthentication.dashboard')
         ->with('success', 'User updated successfully');
 }
@@ -297,5 +315,19 @@ public function deleteUser($id)
 
     return redirect()->route('WebAuthentication.dashboard')
         ->with('success', 'User deleted successfully');
+}
+
+public function addCredit(Request $request)
+{
+    $this->validate($request, [
+        'amount' => 'required|numeric|min:0.01'
+    ]);
+
+    $user = Auth::user();
+    $user->credit += $request->amount;
+    $user->save();
+
+    return redirect()->route('WebAuthentication.userAccount')
+        ->with('success', 'Credit added successfully. New balance: ' . number_format($user->credit, 2) . ' credits');
 }
 }
