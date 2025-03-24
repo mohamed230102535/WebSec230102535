@@ -9,15 +9,21 @@ use App\Models\User;
 
 class quiz extends Model {
     use HasFactory;
+
+    use HasFactory;
+
     protected $table = 'quiz';
 
     protected $fillable = ['title', 'description', 'created_by'];
 
-    public function questions() {
-        return $this->hasMany(question::class);
+    public function questions()
+    {
+        return $this->hasMany(question::class, 'quiz_id');
     }
 
-    public function creator() {
-        return $this->belongsTo(User::class, 'created_by');
+    public function createdBy()
+    {
+        return $this->belongsTo(UsersDB::class, 'created_by');
     }
+
 }

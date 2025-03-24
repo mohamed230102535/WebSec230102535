@@ -137,14 +137,6 @@ Route::get('/WebAuthentication', [AuthController::class, 'index'])->name('WebAut
 
 ///verify
 
-
-
-Route::get('/testRoute', function(){
-    $name = 'testRoute';
-    Mail::to('m7md1hp@gmail.com')->send(new VerificationEmail($name));
-});
-
-
 // User Account Routes
 
 Route::get('/WebAuthentication/userAccount', [AuthController::class, 'userAccount'])->name('WebAuthentication.userAccount');
@@ -154,15 +146,15 @@ Route::get('/WebAuthentication/forgotPassword', [AuthController::class, 'forgotP
 Route::post('/WebAuthentication/doResetPassword', [AuthController::class, 'doResetPassword'])->name('WebAuthentication.doResetPassword');
 
 // User Management Routes
+
 Route::get('/WebAuthentication/dashboard', [AuthController::class, 'dashboard'])->name('WebAuthentication.dashboard');
 Route::get('/WebAuthentication/users/create', [AuthController::class, 'createUser'])->name('WebAuthentication.createUser');
 Route::post('/WebAuthentication/users', [AuthController::class, 'storeUser'])->name('WebAuthentication.storeUser');
 Route::get('/WebAuthentication/users/edit/{id}', [AuthController::class, 'editUser'])->name('WebAuthentication.editUser');
-Route::put('/WebAuthentication/update/{id}', [AuthController::class, 'updateUser'])->name('WebAuthentication.updateUser');
+Route::post('/WebAuthentication/update/{id}', [AuthController::class, 'updateUser'])->name('WebAuthentication.updateUser');
 Route::get('/WebAuthentication/delate/{id}', [AuthController::class, 'deleteUser'])->name('WebAuthentication.deleteUser');
 
 // Product Management Routes
-
 
 Route::get('/WebAuthentication/products', [ProductsController::class, 'list'])->name('WebAuthentication.products');
 Route::get('/WebAuthentication/products/create', [ProductsController::class, 'create'])->name('WebAuthentication.products.create');
@@ -170,6 +162,7 @@ Route::get('/WebAuthentication/products/edit/{product}', [ProductsController::cl
 Route::post('/WebAuthentication/products/create', [ProductsController::class, 'doCreate'])->name('WebAuthentication.products.doCreate');
 Route::get('/WebAuthentication/products/delete/{product}', [ProductsController::class, 'delete'])->name('WebAuthentication.products.delete');
 Route::post('/WebAuthentication/products/edit/{product}', [ProductsController::class, 'doEdit'])->name('WebAuthentication.products.doEdit');
+
 // Quiz Management Routes
 
 Route::get('/WebAuthentication/quiz', [QuizController::class, 'quiz'])->name('WebAuthentication.quiz');
@@ -177,3 +170,11 @@ Route::get('/WebAuthentication/quiz/{id}', [QuizController::class, 'show'])->nam
 Route::post('/WebAuthentication/quiz/{id}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
 Route::get('/WebAuthentication/quiz/{id}/result', [QuizController::class, 'result'])->name('quiz.result');
 Route::get('/WebAuthentication/myQuiz', [QuizController::class, 'myQuizzes'])->name('quiz.MyQuizzes');
+
+// Quiz Management CRUD Routes
+
+Route::get('/WebAuthentication/quizs/create', [QuizController::class, 'quizCreate'])->name('quiz.create'); // Show form to create a new quiz
+Route::post('/WebAuthentication/quizs', [QuizController::class, 'store'])->name('quiz.store'); // Store a new quiz
+Route::get('/WebAuthentication/quizs/{id}/edit', [QuizController::class, 'quizEdit'])->name('quiz.edit'); // Show form to edit an existing quiz
+Route::post('/WebAuthentication/quizs/{id}', [QuizController::class, 'update'])->name('quiz.update'); // Update an existing quiz
+Route::post('/WebAuthentication/quizs/{id}/delete', [QuizController::class, 'quizDestroy'])->name('quiz.destroy'); // Delete a quiz

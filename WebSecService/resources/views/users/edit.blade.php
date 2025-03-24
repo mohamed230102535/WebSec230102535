@@ -16,7 +16,7 @@
 
         <form action="{{ route('users.update', $user) }}" method="POST" class="needs-validation" novalidate>
             @csrf
-            @method('PUT')
+           
 
             <div class="mb-3">
                 <label class="form-label">Name:</label>

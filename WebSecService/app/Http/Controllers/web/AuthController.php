@@ -1,41 +1,24 @@
 <?php
 namespace App\Http\Controllers\Web;
 use Illuminate\Http\Request;
-use DB;
+
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Validation\Rules\Password;
+
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
+
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
+
 use Artisan;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\Crypt;
-use App\Mail\VerificationEmail;
+
 
 
 class AuthController extends Controller{
     use ValidatesRequests;
 
-    //     public function __construct()
-    // {
-    //     $this->middleware('auth:web')->except([
-    //         'list', 
-    //         'login', 
-    //         'register', 
-    //         'doLogin', 
-    //         'doRegister', 
-    //         'forgotPassword', 
-    //         'doResetPassword',
-    //         'index',
-    //         'dashboard',
-    //         'userAccount'
-    //     ]);
-    // }
 
 
     public function index(Request $request){
@@ -68,11 +51,6 @@ class AuthController extends Controller{
             return redirect()->back()->withInput($request->input())->withErrors(['Invalid login information.']);
         }
     
-        // if (!$user->email_verified_at) {
-        //     Auth::logout();
-        //     return redirect()->route('WebAuthentication.login')->withErrors(['Your email is not verified. Please check your email.']);
-        // }
-    
         return redirect()->route('WebAuthentication.index');
     }
     
@@ -99,40 +77,10 @@ class AuthController extends Controller{
             'password' => bcrypt($request->password),
         ]);
     
-       
-        // $token = Crypt::encryptString(json_encode(['id' => $user->id, 'email' => $user->email]));
-        // $link = route("verify", ['token' => $token]);
-        // Mail::to($user->email)->send(new VerificationEmail($link, $user->name));
-    
         return redirect()->route('WebAuthentication.login')
             ->with('success', 'Registration successful! Please check your email to verify your account.');
 
     }
-
-    // public function verify(Request $request) {
-    //     try {
-    //         $decryptedData = json_decode(Crypt::decryptString($request->token), true);
-    //         $user = User::find($decryptedData['id']);
-    
-    //         if (!$user) {
-    //             abort(401, 'Invalid verification link.');
-    //         }
-    
-    //         if ($user->email_verified_at) {
-    //             return redirect()->route('WebAuthentication.login')->with('info', 'Your email is already verified.');
-    //         }
-    
-    //         // Mark user as verified
-    //         $user->email_verified_at = Carbon::now();
-    //         $user->save();
-    
-    //         return redirect()->route('WebAuthentication.login')->with('success', 'Email verified successfully! You can now log in.');
-    //     } catch (\Exception $e) {
-    //         return redirect()->route('WebAuthentication.login')->withErrors(['error' => 'Invalid or expired verification link.']);
-    //     }
-    // }
-       
-
 
 //============================================================================================================
     public function userAccount(){
@@ -250,6 +198,13 @@ public function editUser($id)
 {
     $user = User::findOrFail($id);
 
+    if (auth()->id() == $id) {
+        return back()->with('error', 'You cannot edit yourself.');
+    }
+    if ($id == 1) {
+        return back()->with('error', 'This user cannot be edited.');
+    }
+
     if (auth()->id() != $user->id) {
         abort_if(!auth()->user()->hasPermissionTo('editUser'), 404);
     }
@@ -331,6 +286,10 @@ public function deleteUser($id)
 {
     if (!auth()->user()->hasPermissionTo('deleteUser')) {
         abort(401);
+        }
+    
+    if (auth()->id() == $id || $id == 1) {
+            return back()->with('error', 'Deletion not allowed.');
         }
 
     $user = User::findOrFail($id); 

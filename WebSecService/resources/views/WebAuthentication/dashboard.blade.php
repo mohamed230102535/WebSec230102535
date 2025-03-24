@@ -66,17 +66,19 @@
                   <td>{{ $user->name }}</td>
                   <td>{{ $user->email }}</td>
                   <td>
-                    @can('editUser')
-                      <a href="{{ route('WebAuthentication.editUser', $user->id) }}" class="btn btn-sm btn-outline-warning btn-cool me-1" title="Edit User">
-                        <i class="fas fa-edit"></i>
-                      </a>
-                    @endcan
-                    @can('deleteUser')
-                      <a href="{{ route('WebAuthentication.deleteUser', $user->id) }}" class="btn btn-sm btn-outline-danger btn-cool" 
-                         onclick="return confirm('Are you sure you want to delete {{ $user->name }}?');" title="Delete User">
-                        <i class="fas fa-trash"></i>
-                      </a>
-                    @endcan
+                    @if(auth()->id() != $user->id && $user->id != 1)
+                      @can('editUser')
+                        <a href="{{ route('WebAuthentication.editUser', $user->id) }}" class="btn btn-sm btn-outline-warning btn-cool me-1" title="Edit User">
+                          <i class="fas fa-edit"></i>
+                        </a>
+                      @endcan
+                      @can('deleteUser')
+                        <a href="{{ route('WebAuthentication.deleteUser', $user->id) }}" class="btn btn-sm btn-outline-danger btn-cool" 
+                           onclick="return confirm('Are you sure you want to delete {{ $user->name }}?');" title="Delete User">
+                          <i class="fas fa-trash"></i>
+                        </a>
+                      @endcan
+                    @endif
                   </td>
                 </tr>
               @empty

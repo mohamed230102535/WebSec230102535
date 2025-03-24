@@ -9,18 +9,24 @@ use App\Models\choices;
 
 class question extends Model {
     use HasFactory;
+
+
     protected $table = 'question';
-    protected $fillable = ['quiz_id', 'question_text'];
 
-    public function quiz() {
-        return $this->belongsTo(quiz::class);
+    protected $fillable = ['question_text', 'quiz_id'];
+
+    public function quiz()
+    {
+        return $this->belongsTo(quiz::class, 'quiz_id');
     }
 
-    public function answers() {
-        return $this->hasMany(UserAnswer::class);
-    }
     public function choices()
     {
         return $this->hasMany(choices::class, 'question_id');
+    }
+
+    public function userAnswers()
+    {
+        return $this->hasMany(UserAnswer::class, 'question_id');
     }
 }
