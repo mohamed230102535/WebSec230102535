@@ -1,40 +1,46 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow sticky-top">
-  <div class="container">
-    <a class="navbar-brand fw-bold" href="#">OneHitPoint</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Services</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
-            aria-expanded="false">
-            Dropdown
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" href="#">Action</a></li>
-            <li><a class="dropdown-item" href="#">Another Action</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Something Else</a></li>
-          </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
-        </li>
-      </ul>
-
-      <!-- Login Button -->
-      <div class="d-flex">
-        <a href="{{ route('WebAuthentication.login') }}" class="btn btn-primary px-4">Login</a>
-      </div>
+<nav class="navbar navbar-expand-sm bg-light">
+    <div class="container-fluid">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="./">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="./even">Even Numbers</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="./prime">Prime Numbers</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="./multable">Multiplication Table</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{route('products_list')}}">Products</a>
+            </li>
+            @can('show_users')
+            <li class="nav-item">
+                <a class="nav-link" href="{{route('users')}}">Users</a>
+            </li>
+            @endcan
+        </ul>
+        <ul class="navbar-nav">
+            @auth
+            <li class="nav-item">
+                <span class="nav-link">Credit: ${{auth()->user()->credit}}</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{route('profile')}}">{{auth()->user()->name}}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{route('do_logout')}}">Logout</a>
+            </li>
+            @else
+            <li class="nav-item">
+                <a class="nav-link" href="{{route('login')}}">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{route('register')}}">Register</a>
+            </li>
+            @endauth
+        </ul>
     </div>
-  </div>
 </nav>

@@ -1,180 +1,53 @@
 <?php
-
-use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use App\Http\Controllers\web\ProductsController;
-use App\Http\Controllers\web\UsersController;
-use App\Http\Controllers\Web\AuthController;
-use App\Http\Controllers\Web\QuizController;
-use App\Mail\VerificationEmail;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\ProductsController;
+use App\Http\Controllers\Web\UsersController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('register', [UsersController::class, 'register'])->name('register');
+Route::post('register', [UsersController::class, 'doRegister'])->name('do_register');
+Route::get('login', [UsersController::class, 'login'])->name('login');
+Route::post('login', [UsersController::class, 'doLogin'])->name('do_login');
+Route::get('logout', [UsersController::class, 'doLogout'])->name('do_logout');
+Route::get('users', [UsersController::class, 'list'])->name('users');
+Route::get('profile/{user?}', [UsersController::class, 'profile'])->name('profile');
+Route::get('users/edit/{user?}', [UsersController::class, 'edit'])->name('users_edit');
+Route::post('users/save/{user}', [UsersController::class, 'save'])->name('users_save');
+Route::get('users/delete/{user}', [UsersController::class, 'delete'])->name('users_delete');
+Route::get('users/edit_password/{user?}', [UsersController::class, 'editPassword'])->name('edit_password');
+Route::post('users/save_password/{user}', [UsersController::class, 'savePassword'])->name('save_password');
 
-Route::get('/ass1', function () {
-    return view('ass1'); 
-   });
-
-// Route::get('/test/{number?}', function ($number = null) {
-
-//     $j =   $number ?? 2;
-//     return view('test', compact('j')); 
-//    });
-
-Route::get('/test', function (Request $request) {
-$j =  $request->number??2;
-dd($request->all());
-
-return view('test', compact('j')); 
-});
-
-// Route::get('/test', function () {
-
-//     return view('test'); 
-//    });
-
-
-   Route::get('/minitest', function () {
-    $bill = [
-        ['item' => 'Jam', 'quantity' => 2, 'price' => 11],
-        ['item' => 'Milk', 'quantity' => 1, 'price' => 5],
-        ['item' => 'Bread', 'quantity' => 3, 'price' => 2.5],
-        ['item' => 'Eggs', 'quantity' => 1, 'price' => 3.40],
-        ['item' => 'Rice', 'quantity' => 5, 'price' => 1.00],
-        ['item' => 'Chicken', 'quantity' => 2, 'price' => 8.75]
-    ];
-    
-    return view('minitest', ['bill' => $bill]); 
-});
-
-Route::get('/transcript', function () {
-    $student = [
-        'name' => 'John Doe',
-        'id' => 'STU123456',
-        'department' => 'Computer Science',
-        'GPA' => '3.8'
-    ];
-
-    $courses = [
-        [
-            'course' => 'Mathematics', 'credits' => 3, 'grade' => 'A',
-            'instructor' => 'Dr. Smith', 'schedule' => 'Mon & Wed 10:00 AM - 11:30 AM'
-        ],
-        [
-            'course' => 'Physics', 'credits' => 4, 'grade' => 'B+',
-            'instructor' => 'Dr. Brown', 'schedule' => 'Tue & Thu 2:00 PM - 3:30 PM'
-        ],
-        [
-            'course' => 'Computer Science', 'credits' => 3, 'grade' => 'A-',
-            'instructor' => 'Prof. Johnson', 'schedule' => 'Mon & Wed 1:00 PM - 2:30 PM'
-        ],
-        [
-            'course' => 'English', 'credits' => 2, 'grade' => 'B',
-            'instructor' => 'Ms. Davis', 'schedule' => 'Fri 9:00 AM - 10:30 AM'
-        ],
-        [
-            'course' => 'History', 'credits' => 3, 'grade' => 'C+',
-            'instructor' => 'Mr. Wilson', 'schedule' => 'Tue & Thu 11:00 AM - 12:30 PM'
-        ]
-    ];
-
-    // GPA Calculation
-    $gradePoints = [
-        'A' => 4.0, 'A-' => 3.7, 'B+' => 3.3, 'B' => 3.0,
-        'C+' => 2.7, 'C' => 2.3, 'D' => 2.0, 'F' => 0.0
-    ];
-    
-    $totalCredits = 0;
-    $totalPoints = 0;
-    
-    foreach ($courses as $course) {
-        $credits = $course['credits'];
-        $grade = $course['grade'];
-        $points = $gradePoints[$grade] ?? 0;
-        
-        $totalCredits += $credits;
-        $totalPoints += $credits * $points;
-    }
-
-    $gpa = $totalCredits ? round($totalPoints / $totalCredits, 2) : 0.0;
-
-    return view('transcript', [
-        'student' => $student,
-        'courses' => $courses,
-        'gpa' => $gpa
-    ]);
-});
-
+Route::get('/users/create', [UsersController::class, 'create'])->name('users_create');
+Route::post('/users/store', [UsersController::class, 'store'])->name('users_store');
 
 
 
 
 Route::get('products', [ProductsController::class, 'list'])->name('products_list');
+Route::get('products/edit/{product?}', [ProductsController::class, 'edit'])->name('products_edit');
+Route::post('products/save/{product?}', [ProductsController::class, 'save'])->name('products_save');
+Route::get('products/delete/{product}', [ProductsController::class, 'delete'])->name('products_delete');
+Route::post('/purchase/{productId}', [ProductsController::class, 'purchaseProduct'])->name('purchase_product'); //buy product
 
 
+Route::get('/', function () {
+    return view('welcome');
+});
 
+Route::get('/multable', function (Request $request) {
+    $j = $request->number??5;
+    $msg = $request->msg;
+    return view('multable', compact("j", "msg"));
+});
 
+Route::get('/even', function () {
+    return view('even');
+});
 
-Route::get('/users', [UsersController::class, 'index'])->name('users.index');
-Route::get('/users/create', [UsersController::class, 'create'])->name('users.create');
-Route::post('/users', [UsersController::class, 'store'])->name('users.store');
-Route::get('/users/{user}/edit', [UsersController::class, 'edit'])->name('users.edit');
-Route::put('/users/{user}', [UsersController::class, 'update'])->name('users.update');
-Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy');
+Route::get('/prime', function () {
+    return view('prime');
+});
 
-
-//Web Authentication ===========================================================================================
-
-Route::get('/WebAuthentication', [AuthController::class, 'index'])->name('WebAuthentication.index');
-
-Route::get('/WebAuthentication/login', [AuthController::class, 'login'])->name('WebAuthentication.login');
-Route::post('/WebAuthentication/login', [AuthController::class, 'doLogin'])->name('WebAuthentication.doLogin');
-Route::get('/WebAuthentication/register', [AuthController::class, 'register'])->name('WebAuthentication.register');
-Route::post('/WebAuthentication/register', [AuthController::class, 'doRegister'])->name('WebAuthentication.doRegister');
-Route::post('/WebAuthentication/logout', [AuthController::class, 'doLogout'])->name('WebAuthentication.doLogout');
-Route::get('/WebAuthentication', [AuthController::class, 'index'])->name('WebAuthentication.index');
-
-///verify
-
-// User Account Routes
-
-Route::get('/WebAuthentication/userAccount', [AuthController::class, 'userAccount'])->name('WebAuthentication.userAccount');
-Route::post('/WebAuthentication/updateUsername', [AuthController::class, 'updateUsername'])->name('WebAuthentication.updateUsername');
-Route::post('/WebAuthentication/updatePassword', [AuthController::class, 'updatePassword'])->name('WebAuthentication.updatePassword');
-Route::get('/WebAuthentication/forgotPassword', [AuthController::class, 'forgotPassword'])->name('WebAuthentication.forgotPassword');
-Route::post('/WebAuthentication/doResetPassword', [AuthController::class, 'doResetPassword'])->name('WebAuthentication.doResetPassword');
-
-// User Management Routes
-
-Route::get('/WebAuthentication/dashboard', [AuthController::class, 'dashboard'])->name('WebAuthentication.dashboard');
-Route::get('/WebAuthentication/users/create', [AuthController::class, 'createUser'])->name('WebAuthentication.createUser');
-Route::post('/WebAuthentication/users', [AuthController::class, 'storeUser'])->name('WebAuthentication.storeUser');
-Route::get('/WebAuthentication/users/edit/{id}', [AuthController::class, 'editUser'])->name('WebAuthentication.editUser');
-Route::post('/WebAuthentication/update/{id}', [AuthController::class, 'updateUser'])->name('WebAuthentication.updateUser');
-Route::get('/WebAuthentication/delate/{id}', [AuthController::class, 'deleteUser'])->name('WebAuthentication.deleteUser');
-
-// Product Management Routes
-
-Route::get('/WebAuthentication/products', [ProductsController::class, 'list'])->name('WebAuthentication.products');
-Route::get('/WebAuthentication/products/create', [ProductsController::class, 'create'])->name('WebAuthentication.products.create');
-Route::get('/WebAuthentication/products/edit/{product}', [ProductsController::class, 'edit'])->name('WebAuthentication.products.edit');
-Route::post('/WebAuthentication/products/create', [ProductsController::class, 'doCreate'])->name('WebAuthentication.products.doCreate');
-Route::get('/WebAuthentication/products/delete/{product}', [ProductsController::class, 'delete'])->name('WebAuthentication.products.delete');
-Route::post('/WebAuthentication/products/edit/{product}', [ProductsController::class, 'doEdit'])->name('WebAuthentication.products.doEdit');
-
-// Quiz Management Routes
-
-Route::get('/WebAuthentication/quiz', [QuizController::class, 'quiz'])->name('WebAuthentication.quiz');
-Route::get('/WebAuthentication/quiz/{id}', [QuizController::class, 'show'])->name('quiz.show');
-Route::post('/WebAuthentication/quiz/{id}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
-Route::get('/WebAuthentication/quiz/{id}/result', [QuizController::class, 'result'])->name('quiz.result');
-Route::get('/WebAuthentication/myQuiz', [QuizController::class, 'myQuizzes'])->name('quiz.MyQuizzes');
-
-// Quiz Management CRUD Routes
-
-Route::get('/WebAuthentication/quizs/create', [QuizController::class, 'quizCreate'])->name('quiz.create'); // Show form to create a new quiz
-Route::post('/WebAuthentication/quizs', [QuizController::class, 'store'])->name('quiz.store'); // Store a new quiz
-Route::get('/WebAuthentication/quizs/{id}/edit', [QuizController::class, 'quizEdit'])->name('quiz.edit'); // Show form to edit an existing quiz
-Route::post('/WebAuthentication/quizs/{id}', [QuizController::class, 'update'])->name('quiz.update'); // Update an existing quiz
-Route::post('/WebAuthentication/quizs/{id}/delete', [QuizController::class, 'quizDestroy'])->name('quiz.destroy'); // Delete a quiz
+Route::get('/test', function () {
+    return view('test');
+});

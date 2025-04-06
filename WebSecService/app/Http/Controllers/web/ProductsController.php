@@ -1,102 +1,126 @@
 <?php
 namespace App\Http\Controllers\Web;
-use App\Models\Product;
+
+use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
 use DB;
+
 use App\Http\Controllers\Controller;
+use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\User;
 
 class ProductsController extends Controller {
-    public function list(Request $request) {
-        
-        $query = Product::select("products.*");
-        $query->when($request->keywords,
-        fn($q)=> $q->where("name", "like", "%$request->keywords%"));
-        $query->when($request->min_price,
-        fn($q)=> $q->where("price", ">=", $request->min_price));
-        $query->when($request->max_price, fn($q)=>
-        $q->where("price", "<=", $request->max_price));
-        $query->when($request->order_by,
-        fn($q)=> $q->orderBy($request->order_by, $request->order_direction??"ASC"));
-        $products = $query->get();
-        
-         return view("WebAuthentication.products.list", compact('products'));
-        }
 
-        public function create()
-    {
-        if (!auth()->user()->hasPermissionTo('create')) {
-            abort(404);
-            }
-        return view('WebAuthentication.products.productAdd');
-    }
-  
+	use ValidatesRequests;
 
-    public function edit(Product $product)
+	public function __construct()
     {
-        if (!auth()->user()->hasPermissionTo('edit')) {
-            abort(404);
-            }
-        return view('WebAuthentication.products.productEdit', compact('product'));
+        $this->middleware('auth:web')->except('list');
     }
 
-  
+	public function list(Request $request) {
 
-     public function doCreate(Request $request)
-    {
-        $validated = $request->validate([
-            'code' => 'required|string|max:10',
-            'name' => 'required|string|max:255',
-            'model' => 'required|string|max:50',
-            'photo' => 'required|image|max:2048', 
-            'description' => 'nullable|string',
-        ]);
+		$query = Product::select("products.*");
 
-       
-        if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('products', 'public');
-            $validated['photo'] = $path;
-        }
+		$query->when($request->keywords, 
+		fn($q)=> $q->where("name", "like", "%$request->keywords%"));
 
-        Product::create($validated);
+		$query->when($request->min_price, 
+		fn($q)=> $q->where("price", ">=", $request->min_price));
+		
+		$query->when($request->max_price, fn($q)=> 
+		$q->where("price", "<=", $request->max_price));
+		
+		$query->when($request->order_by, 
+		fn($q)=> $q->orderBy($request->order_by, $request->order_direction??"ASC"));
 
-        return redirect()->route('WebAuthentication.products')->with('success', 'Product created successfully!');
-    }  
+		$products = $query->get();
 
-    public function doEdit(Product $product, Request $request)
-    {
-        $validated = $request->validate([
-            'code' => 'required|string|max:10',
-            'name' => 'required|string|max:255',
-            'model' => 'required|string|max:50',
-            'photo' => 'nullable|image|max:2048', // Optional photo update
-            'description' => 'nullable|string',
-        ]);
+		return view('products.list', compact('products'));
+	}
 
-        // Handle photo update
-        if ($request->hasFile('photo')) {
-      
-            if ($product->photo && \Storage::disk('public')->exists($product->photo)) {
-                \Storage::disk('public')->delete($product->photo);
-            }
-            $path = $request->file('photo')->store('products', 'public');
-            $validated['photo'] = $path;
-        }
+	public function edit(Request $request, Product $product = null) {
 
-        $product->update($validated);
+		if(!auth()->user()) return redirect('/');
 
-        return redirect()->route('WebAuthentication.products')->with('success', 'Product updated successfully!');
-    }
-    public function delete(Product $product)
-    {
-        if (!auth()->user()->hasPermissionTo('delete')) {
-            abort(404);
-            }
-        if ($product->photo && \Storage::disk('public')->exists($product->photo)) {
-            \Storage::disk('public')->delete($product->photo);
-        }
+		$product = $product??new Product();
 
-        $product->delete();
+		return view('products.edit', compact('product'));
+	}
 
-        return redirect()->route('WebAuthentication.products')->with('success', 'Product deleted successfully!');
-    }
+public function save(Request $request, Product $product = null) {
+
+    $this->validate($request, [
+        'code' => ['required', 'string', 'max:64'],
+        'name' => ['required', 'string', 'max:256'],
+        'model' => ['required', 'string', 'max:128'],
+        'description' => ['nullable', 'string', 'max:1024'],
+        'price' => ['required', 'numeric', 'min:0'],
+        'stock' => ['required', 'integer', 'min:0'],
+    ]);
+
+    $product = $product ?? new Product();
+    $product->fill($request->all());
+    $product->save();
+
+    return redirect()->route('products_list');
+}
+
+
+	public function delete(Request $request, Product $product) {
+
+		if(!auth()->user()->hasPermissionTo('delete_products')) abort(401);
+
+		$product->delete();
+
+		return redirect()->route('products_list');
+	}
+
+	public function purchaseProduct(Request $request, $productId)
+	{
+		
+		if (!auth()->check()) {
+			return back()->with('error', 'You must be logged in to make a purchase.');
+		}
+	
+	
+		$user = auth()->user();
+	
+		
+		$product = Product::find($productId);
+	
+		
+		if (!$product) {
+			return back()->with('error', 'Product not found.');
+		}
+	
+		
+		if ($product->stock <= 0) {
+			return back()->with('error', 'This product is out of stock.');
+		}
+	
+		
+		if ($user->credit < $product->price) {
+			return back()->with('error', 'You do not have enough credit to make this purchase.');
+		}
+	
+		
+		$user->credit -= $product->price;
+		$product->stock -= 1;
+	
+		
+		$user->save();
+		$product->save();
+	
+		
+		$purchase = new Purchase();
+		$purchase->user_id = $user->id;
+		$purchase->product_id = $product->id;
+		$purchase->price_at_purchase = $product->price;
+		$purchase->save();
+	
+		return back()->with('success', 'Purchase completed successfully!');
+	}
+	
 }

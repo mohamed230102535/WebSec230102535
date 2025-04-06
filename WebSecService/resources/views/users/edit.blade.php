@@ -1,68 +1,64 @@
 @extends('layouts.master')
-
 @section('title', 'Edit User')
-
 @section('content')
-<div class="container mt-4">
-    <div class="card shadow-lg p-4">
-        <h2 class="text-center text-primary mb-4">Edit User</h2>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  $("#clean_permissions").click(function(){
+    $('#permissions').val([]);
+  });
+  $("#clean_roles").click(function(){
+    $('#roles').val([]);
+  });
+});
+</script>
 
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="d-flex justify-content-center">
+    <div class="row m-4 col-sm-8">
+        <form action="{{route('users_save', $user->id)}}" method="post">
+            {{ csrf_field() }}
+            @foreach($errors->all() as $error)
+            <div class="alert alert-danger">
+                <strong>Error!</strong> {{$error}}
             </div>
-        @endif
-
-        <form action="{{ route('users.update', $user) }}" method="POST" class="needs-validation" novalidate>
-            @csrf
-           
-
-            <div class="mb-3">
-                <label class="form-label">Name:</label>
-                <input type="text" name="name" value="{{ $user->name }}" class="form-control" required>
-                <div class="invalid-feedback">Please enter a name.</div>
+            @endforeach
+            <div class="row mb-2">
+                <div class="col-12">
+                    <label for="code" class="form-label">Name:</label>
+                    <input type="text" class="form-control" placeholder="Name" name="name" required value="{{$user->name}}">
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Email:</label>
-                <input type="email" name="email" value="{{ $user->email }}" class="form-control" required>
-                <div class="invalid-feedback">Please enter a valid email.</div>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Role:</label>
-                <select name="role" class="form-select" required>
-                    <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
-                    <option value="guest" {{ $user->role == 'guest' ? 'selected' : '' }}>Guest</option>
+            @can('admin_users')
+            <div class="col-12 mb-2">
+                <label for="model" class="form-label">Roles:</label> (<a href='#' id='clean_roles'>reset</a>)
+                <select multiple class="form-select" id='roles' name="roles[]">
+                    @foreach($roles as $role)
+                    <option value='{{$role->name}}' {{$role->taken?'selected':''}}>{{$role->name}}</option>
+                    @endforeach
                 </select>
             </div>
 
-            <div class="d-flex justify-content-between">
-                <a href="{{ route('users.index') }}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-success">Update</button>
+            <div class="col-12 mb-2">
+                <label for="model" class="form-label">Direct Permissions:</label> (<a href='#' id='clean_permissions'>reset</a>)
+                <select multiple class="form-select" id='permissions' name="permissions[]">
+                    @foreach($permissions as $permission)
+                        <option value='{{$permission->name}}' {{$permission->taken?'selected':''}}>{{$permission->display_name}}</option>
+                    @endforeach
+                </select>
             </div>
+            @endcan
+
+           
+            @can('charge_customer_credit')
+            <div class="col-12 mb-2">
+                <label for="charge_credit" class="form-label">Charge Credit:</label>
+                <input type="number" step="0.01" class="form-control" id="charge_credit" name="charge_credit" placeholder="Amount to charge" min="0" required>
+            </div>
+            @endcan
+
+            <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
 </div>
-
-{{-- Bootstrap Form Validation --}}
-<script>
-    (function () {
-        'use strict'
-        var forms = document.querySelectorAll('.needs-validation')
-
-        Array.prototype.slice.call(forms).forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
-                form.classList.add('was-validated')
-            }, false)
-        })
-    })();
-</script>
-
 @endsection
