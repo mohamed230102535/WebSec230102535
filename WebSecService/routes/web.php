@@ -6,15 +6,22 @@ use App\Http\Controllers\Web\UsersController;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationEmail;
-use Dcblogdev\MsGraph\Facades\MsGraph;
 use App\Http\Controllers\Web\Auth\AuthController;
 use App\Http\Controllers\Web\Auth\PagesController;
 
-Route::get('register', [UsersController::class, 'register'])->name('register');
-Route::post('register', [UsersController::class, 'doRegister'])->name('do_register');
-Route::get('login', [UsersController::class, 'login'])->name('login');
-Route::post('login', [UsersController::class, 'doLogin'])->name('do_login');
-Route::get('logout', [UsersController::class, 'doLogout'])->name('do_logout');
+// Authentication Routes
+Route::middleware(['web'])->group(function() {
+    // Regular Login/Register
+    Route::get('register', [UsersController::class, 'register'])->name('register');
+    Route::post('register', [UsersController::class, 'doRegister'])->name('do_register');
+    Route::post('login', [UsersController::class, 'doLogin'])->name('do_login');
+    Route::get('logout', [UsersController::class, 'doLogout'])->name('do_logout');
+    
+    // Auth Routes
+    Route::get('login', [AuthController::class, 'login'])->name('login');
+    Route::get('auth/github', [AuthController::class, 'redirectToGithub'])->name('github.login');
+    Route::get('auth/github/callback', [AuthController::class, 'handleGithubCallback'])->name('github.callback');
+});
 Route::get('users', [UsersController::class, 'list'])->name('users');
 Route::get('profile/{user?}', [UsersController::class, 'profile'])->name('profile');
 Route::get('users/edit/{user?}', [UsersController::class, 'edit'])->name('users_edit');
@@ -64,21 +71,12 @@ Route::get('/test', function () {
 
 
 
-// routes/web.php
-Route::middleware(['web', 'guest'])->group(function() {
-    Route::get('login', [AuthController::class, 'login'])->name('login');
-    Route::get('connect', [AuthController::class, 'connect'])->name('connect');
-});
 
-//
-Route::get('msgraph/callback', [\App\Http\Controllers\Web\Auth\AuthController::class, 'callback'])
-    ->name('msgraph.callback');
+
 // Authenticated routes
-Route::middleware(['web', 'auth:msgraph'])->prefix('app')->group(function() {
-    Route::get('/', [PagesController::class, 'app'])->name('app');
+Route::middleware(['web', 'auth'])->group(function() {
+    Route::prefix('app')->group(function() {
+        Route::get('/', [PagesController::class, 'app'])->name('app');
+    });
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 });
-
-Route::get('msgraph/decision', [AuthController::class, 'decision'])->name('msgraph.decision');
-Route::post('msgraph/login', [AuthController::class, 'loginFromMsGraph'])->name('msgraph.login');
-Route::post('msgraph/register', [AuthController::class, 'registerFromMsGraph'])->name('msgraph.register');

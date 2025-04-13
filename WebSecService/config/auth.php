@@ -40,14 +40,7 @@ return [
         'driver' => 'session',
         'provider' => 'users',
     ],
-
-    'msgraph' => [
-        'driver' => 'session',
-        'provider' => 'users',
-    ],
 ],
-
-
 
 
     /*

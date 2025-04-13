@@ -5,9 +5,9 @@
   <div class="card m-4 col-sm-6">
     <div class="card-body">
        <div class="mb-4">
-        <a href="{{ route('connect') }}" class="btn btn-outline-primary w-100 py-2">
-          <img src="https://img.icons8.com/color/24/000000/microsoft.png" class="me-2">
-          Continue with Microsoft
+        <a href="{{ route('github.login') }}" class="btn btn-dark w-100 py-2">
+          <i class="fab fa-github me-2"></i>
+          Continue with GitHub
         </a>
       </div>
       <form action="{{ route('do_login') }}" method="post">

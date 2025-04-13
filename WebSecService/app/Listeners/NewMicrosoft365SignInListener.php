@@ -18,13 +18,22 @@ class NewMicrosoft365SignInListener
             'password' => '',
         ]);
 
-        (new MsGraph)->storeToken(
-            $event->token['accessToken'],
-            $event->token['refreshToken'],
-            $event->token['expires'],
-            $user->id,
-            $user->email
-        );
+        try {
+            logger()->info('Storing token for user:', ['user_id' => $user->id, 'email' => $user->email]);
+            
+            (new MsGraph)->storeToken(
+                $event->token['accessToken'],
+                $event->token['refreshToken'],
+                $event->token['expires'],
+                $user->id,
+                $user->email
+            );
+            
+            logger()->info('Token stored successfully');
+        } catch (\Exception $e) {
+            logger()->error('Failed to store token:', ['error' => $e->getMessage()]);
+            throw $e;
+        }
 
         Auth::login($user);
     }
