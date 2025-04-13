@@ -35,12 +35,20 @@ return [
     |
     */
 
-    'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
+'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
     ],
+
+    'msgraph' => [
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+],
+
+
+
 
     /*
     |--------------------------------------------------------------------------

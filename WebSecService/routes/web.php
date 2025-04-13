@@ -1,0 +1,84 @@
+<?php
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\ProductsController;
+use App\Http\Controllers\Web\UsersController;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerificationEmail;
+use Dcblogdev\MsGraph\Facades\MsGraph;
+use App\Http\Controllers\Web\Auth\AuthController;
+use App\Http\Controllers\Web\Auth\PagesController;
+
+Route::get('register', [UsersController::class, 'register'])->name('register');
+Route::post('register', [UsersController::class, 'doRegister'])->name('do_register');
+Route::get('login', [UsersController::class, 'login'])->name('login');
+Route::post('login', [UsersController::class, 'doLogin'])->name('do_login');
+Route::get('logout', [UsersController::class, 'doLogout'])->name('do_logout');
+Route::get('users', [UsersController::class, 'list'])->name('users');
+Route::get('profile/{user?}', [UsersController::class, 'profile'])->name('profile');
+Route::get('users/edit/{user?}', [UsersController::class, 'edit'])->name('users_edit');
+Route::post('users/save/{user}', [UsersController::class, 'save'])->name('users_save');
+Route::get('users/delete/{user}', [UsersController::class, 'delete'])->name('users_delete');
+Route::get('users/edit_password/{user?}', [UsersController::class, 'editPassword'])->name('edit_password');
+Route::post('users/save_password/{user}', [UsersController::class, 'savePassword'])->name('save_password');
+
+Route::get('/users/create', [UsersController::class, 'create'])->name('users_create');
+Route::post('/users/store', [UsersController::class, 'store'])->name('users_store');
+
+Route::get('verify', [UsersController::class, 'verify'])->name('verify');
+
+Route::get('/forgot-password', [UsersController::class, 'showForgotForm'])->name('password.request');
+Route::post('/password/reset', [UsersController::class, 'sendResetLink'])->name('password.reset');
+Route::get('ShowRestForm', [UsersController::class, 'showResetLink'])->name('ShowRestForm');
+Route::post('/reset-password', [UsersController::class, 'resetPassword'])->name('password.update');
+
+Route::get('products', [ProductsController::class, 'list'])->name('products_list');
+Route::get('products/edit/{product?}', [ProductsController::class, 'edit'])->name('products_edit');
+Route::post('products/save/{product?}', [ProductsController::class, 'save'])->name('products_save');
+Route::get('products/delete/{product}', [ProductsController::class, 'delete'])->name('products_delete');
+Route::post('/purchase/{productId}', [ProductsController::class, 'purchaseProduct'])->name('purchase_product'); //buy product
+
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/multable', function (Request $request) {
+    $j = $request->number??5;
+    $msg = $request->msg;
+    return view('multable', compact("j", "msg"));
+});
+
+Route::get('/even', function () {
+    return view('even');
+});
+
+Route::get('/prime', function () {
+    return view('prime');
+});
+
+Route::get('/test', function () {
+    return view('test');
+});
+
+
+
+// routes/web.php
+Route::middleware(['web', 'guest'])->group(function() {
+    Route::get('login', [AuthController::class, 'login'])->name('login');
+    Route::get('connect', [AuthController::class, 'connect'])->name('connect');
+});
+
+//
+Route::get('msgraph/callback', [\App\Http\Controllers\Web\Auth\AuthController::class, 'callback'])
+    ->name('msgraph.callback');
+// Authenticated routes
+Route::middleware(['web', 'auth:msgraph'])->prefix('app')->group(function() {
+    Route::get('/', [PagesController::class, 'app'])->name('app');
+    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+Route::get('msgraph/decision', [AuthController::class, 'decision'])->name('msgraph.decision');
+Route::post('msgraph/login', [AuthController::class, 'loginFromMsGraph'])->name('msgraph.login');
+Route::post('msgraph/register', [AuthController::class, 'registerFromMsGraph'])->name('msgraph.register');
