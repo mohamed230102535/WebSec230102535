@@ -9,19 +9,18 @@ use App\Mail\VerificationEmail;
 use App\Http\Controllers\Web\Auth\AuthController;
 use App\Http\Controllers\Web\Auth\PagesController;
 
-// Authentication Routes
-Route::middleware(['web'])->group(function() {
-    // Regular Login/Register
-    Route::get('register', [UsersController::class, 'register'])->name('register');
-    Route::post('register', [UsersController::class, 'doRegister'])->name('do_register');
-    Route::post('login', [UsersController::class, 'doLogin'])->name('do_login');
-    Route::get('logout', [UsersController::class, 'doLogout'])->name('do_logout');
-    
-    // Auth Routes
-    Route::get('login', [AuthController::class, 'login'])->name('login');
-    Route::get('auth/github', [AuthController::class, 'redirectToGithub'])->name('github.login');
-    Route::get('auth/github/callback', [AuthController::class, 'handleGithubCallback'])->name('github.callback');
-});
+// Regular Authentication Routes
+Route::get('register', [UsersController::class, 'register'])->name('register');
+Route::post('register', [UsersController::class, 'doRegister'])->name('do_register');
+Route::get('login', [UsersController::class, 'login'])->name('login');
+Route::post('login', [UsersController::class, 'doLogin'])->name('do_login');
+Route::get('logout', [UsersController::class, 'doLogout'])->name('do_logout');
+
+// GitHub Authentication Routes
+Route::get('auth/github', [AuthController::class, 'redirectToGithub'])->name('github.login');
+Route::get('auth/github/callback', [AuthController::class, 'handleGithubCallback'])->name('github.callback');
+
+// User Management Routes
 Route::get('users', [UsersController::class, 'list'])->name('users');
 Route::get('profile/{user?}', [UsersController::class, 'profile'])->name('profile');
 Route::get('users/edit/{user?}', [UsersController::class, 'edit'])->name('users_edit');
