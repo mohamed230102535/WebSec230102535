@@ -15,14 +15,12 @@ use App\Models\User;
 use App\Models\Purchase;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\VerificationEmail;
-use App\Mail\ForgetPassEmail;
+use App\Traits\EmailHelper;
 
-
-class UsersController extends Controller {
-
-   
-	use ValidatesRequests;
+class UsersController extends Controller
+{
+    use EmailHelper;
+    use ValidatesRequests;
 
     public function list(Request $request) {
         if (!auth()->user()->hasPermissionTo('show_users')) {
@@ -83,7 +81,7 @@ class UsersController extends Controller {
         $title = "Verification Link";
         $token = Crypt::encryptString(json_encode(['id' => $user->id, 'email' => $user->email]));
         $link = route("verify", ['token' => $token]);
-        Mail::to($user->email)->send(new VerificationEmail($link, $user->name));
+        $this->sendSimpleEmail($user->email, 'Email Verification', 'emails.verification', ['link' => $link, 'name' => $request->name]);
 
         return redirect('/');
     }
@@ -316,11 +314,10 @@ public function sendResetLink(Request $request)
     $link = route("ShowRestForm", ['token' => $token]);
 
 
-    Mail::to($user->email)->send(new  ForgetPassEmail($link, $user->name));
+    $this->sendSimpleEmail($user->email, 'Reset Password', 'emails.ResetForm', ['link' => $link]);
 
     return redirect()->route('login')->with('status', 'Password reset link sent to your email.');
 }
-
 
 
 public function showResetLink(Request $request)

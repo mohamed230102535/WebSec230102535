@@ -68,6 +68,33 @@ Route::get('/test', function () {
     return view('test');
 });
 
+Route::get('/test-email', function () {
+    try {
+        $config = config('mail');
+        $debug = [
+            'driver' => config('mail.default'),
+            'host' => config('mail.mailers.smtp.host'),
+            'port' => config('mail.mailers.smtp.port'),
+            'from' => config('mail.from.address'),
+            'encryption' => config('mail.mailers.smtp.encryption'),
+            'username' => config('mail.mailers.smtp.username'),
+            'password_set' => !empty(config('mail.mailers.smtp.password'))
+        ];
+        
+        try {
+            Mail::raw('Test email from Laravel at ' . now(), function($message) {
+                $message->to('m7md1hp@gmail.com')
+                        ->subject('Test Email ' . now());
+            });
+            return 'Email sent successfully! Debug info: ' . json_encode($debug, JSON_PRETTY_PRINT);
+        } catch (\Swift_TransportException $e) {
+            return 'SMTP Error: ' . $e->getMessage() . '\nDebug info: ' . json_encode($debug, JSON_PRETTY_PRINT);
+        }
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
+
 
 
 
