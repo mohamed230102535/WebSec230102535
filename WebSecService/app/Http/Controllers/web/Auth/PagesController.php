@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Web\Auth;
 use App\Http\Controllers\Controller;
 
+use Dcblogdev\MsGraph\Facades\MsGraph; // Fixed namespace
+
 
 class PagesController extends Controller
 {
@@ -11,6 +13,12 @@ class PagesController extends Controller
      */
     public function app()
     {
-        return view('welcome');
+        // Fetch user profile from Microsoft Graph
+       dd(MsGraph::get('me'));
+
+        // Return view with user data (remove dd() for production)
+        return view('welcome', [
+            'user' => $user
+        ]);
     }
 }

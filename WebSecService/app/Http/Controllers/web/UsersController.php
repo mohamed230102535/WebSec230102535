@@ -15,12 +15,14 @@ use App\Models\User;
 use App\Models\Purchase;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Mail;
-use App\Traits\EmailHelper;
+use App\Mail\VerificationEmail;
+use App\Mail\ForgetPassEmail;
 
-class UsersController extends Controller
-{
-    use EmailHelper;
-    use ValidatesRequests;
+
+class UsersController extends Controller {
+
+   
+	use ValidatesRequests;
 
     public function list(Request $request) {
         if (!auth()->user()->hasPermissionTo('show_users')) {
@@ -81,7 +83,7 @@ class UsersController extends Controller
         $title = "Verification Link";
         $token = Crypt::encryptString(json_encode(['id' => $user->id, 'email' => $user->email]));
         $link = route("verify", ['token' => $token]);
-        $this->sendSimpleEmail($user->email, 'Email Verification', 'emails.verification', ['link' => $link, 'name' => $request->name]);
+        Mail::to($user->email)->send(new VerificationEmail($link, $user->name));
 
         return redirect('/');
     }
@@ -101,22 +103,29 @@ class UsersController extends Controller
     }
 
     public function doLogin(Request $request) {
+    $user = User::where('email', $request->email)->first();
 
-        $user = User::where('email', $request->email)->first();
-        if(!$user->email_verified_at)
-        return redirect()->back()->withInput($request->input())
-        ->withErrors('Your email is not verified.');
-
-    	if(!Auth::attempt(['email' => $request->email, 'password' => $request->password]))
-            return redirect()->back()->withInput($request->input())->withErrors('Invalid login information.');
-
-        $user = User::where('email', $request->email)->first();
-        Auth::setUser($user);
-
-     
-
-        return redirect('/');
+    if (!$user) {
+        return redirect()->back()
+            ->withInput($request->input())
+            ->withErrors('No account found with this email.');
     }
+
+    if (!$user->email_verified_at) {
+        return redirect()->back()
+            ->withInput($request->input())
+            ->withErrors('Your email is not verified.');
+    }
+
+    if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        return redirect()->back()
+            ->withInput($request->input())
+            ->withErrors('Invalid login information.');
+    }
+
+    Auth::setUser($user);
+    return redirect('/');
+}
 
     public function doLogout(Request $request) {
     	
@@ -314,10 +323,11 @@ public function sendResetLink(Request $request)
     $link = route("ShowRestForm", ['token' => $token]);
 
 
-    $this->sendSimpleEmail($user->email, 'Reset Password', 'emails.ResetForm', ['link' => $link]);
+    Mail::to($user->email)->send(new  ForgetPassEmail($link, $user->name));
 
     return redirect()->route('login')->with('status', 'Password reset link sent to your email.');
 }
+
 
 
 public function showResetLink(Request $request)
