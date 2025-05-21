@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->integer('credit')->default(0);
+        Schema::create('oauth_personal_access_clients', function (Blueprint $table) {
+            $table->uuid('client_id')->primary();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('credit');
-        });
+        Schema::dropIfExists('oauth_personal_access_clients');
     }
 };
