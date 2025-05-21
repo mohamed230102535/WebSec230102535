@@ -29,6 +29,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="{{route('cryptography')}}">
+                        <i class="fas fa-lock"></i> Cryptography
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{{route('products_list')}}">
                         <i class="fas fa-box"></i> Products
                     </a>

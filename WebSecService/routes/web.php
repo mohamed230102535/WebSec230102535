@@ -76,9 +76,101 @@ Route::get('/test', function () {
     return view('test');
 });
 
+Route::get('/cryptography', function (Request $request) {
+    $data = $request->data ?? "Welcome to Cryptography";
+    $action = $request->action ?? "Encrypt";
+    $result = $request->result ?? "";
+    $status = "Failed";
 
+    try {
+        if($action == "Encrypt") {
+            $temp = openssl_encrypt($data, 'aes-128-ecb', 'thisisasecretkey', OPENSSL_RAW_DATA, '');
+            if($temp) {
+                $status = 'Encrypted Successfully';
+                $result = base64_encode($temp);
+            }
+        }
+        else if($action == "Decrypt") {
+            $temp = base64_decode($data);
+            $result = openssl_decrypt($temp, 'aes-128-ecb', 'thisisasecretkey', OPENSSL_RAW_DATA, '');
+            if($result) $status = 'Decrypted Successfully';
+        }
+        else if($action == "Hash") {
+            $temp = hash('sha256', $data);
+            $result = base64_encode($temp);
+            $status = 'Hashed Successfully';
+        }
+        else if($action == "Sign") {
+            $path = storage_path('app/certificates/useremail@domain.com.pfx');
+            $password = '12345678';
+            $certificates = [];
+            if (file_exists($path)) {
+                $pfx = file_get_contents($path);
+                if(openssl_pkcs12_read($pfx, $certificates, $password)) {
+                    $privateKey = $certificates['pkey'];
+                    $signature = '';
+                    if(openssl_sign($data, $signature, $privateKey, 'sha256')) {
+                        $result = base64_encode($signature);
+                        $status = 'Signed Successfully';
+                    }
+                } else {
+                    $status = 'Failed to read PFX file';
+                }
+            } else {
+                $status = 'PFX file not found';
+            }
+        }
+        else if($action == "Verify") {
+            $signature = base64_decode($request->result);
+            $path = storage_path('app/certificates/useremail@domain.com.crt');
+            if (file_exists($path)) {
+                $publicKey = file_get_contents($path);
+                if(openssl_verify($data, $signature, $publicKey, 'sha256')) {
+                    $status = 'Verified Successfully';
+                }
+            } else {
+                $status = 'Certificate file not found';
+            }
+        }
+        else if($action == "KeySend") {
+            $path = storage_path('app/certificates/useremail@domain.com.crt');
+            if (file_exists($path)) {
+                $publicKey = file_get_contents($path);
+                $temp = '';
+                if(openssl_public_encrypt($data, $temp, $publicKey)) {
+                    $result = base64_encode($temp);
+                    $status = 'Key is Encrypted Successfully';
+                }
+            } else {
+                $status = 'Certificate file not found';
+            }
+        }
+        else if($action == "KeyRecive") {
+            $path = storage_path('app/certificates/useremail@domain.com.pfx');
+            $password = '12345678';
+            $certificates = [];
+            if (file_exists($path)) {
+                $pfx = file_get_contents($path);
+                if(openssl_pkcs12_read($pfx, $certificates, $password)) {
+                    $privateKey = $certificates['pkey'];
+                    $encryptedKey = base64_decode($data);
+                    $result = '';
+                    if(openssl_private_decrypt($encryptedKey, $result, $privateKey)) {
+                        $status = 'Key is Decrypted Successfully';
+                    }
+                } else {
+                    $status = 'Failed to read PFX file';
+                }
+            } else {
+                $status = 'PFX file not found';
+            }
+        }
+    } catch (\Exception $e) {
+        $status = 'Error: ' . $e->getMessage();
+    }
 
-
+    return view('cryptography', compact('data', 'result', 'action', 'status'));
+})->name('cryptography');
 
 // Authenticated routes
 Route::middleware(['web', 'auth'])->group(function() {
