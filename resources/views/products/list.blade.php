@@ -83,6 +83,16 @@
                     <input name="keywords" type="text" class="form-control" placeholder="Search Keywords" value="{{ request()->keywords }}">
                 </div>
                 <div class="col-md-2">
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->slug }}" {{ request()->category == $category->slug ? 'selected' : '' }}>
+                                {{ $category->name }} ({{ $category->products_count }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <input name="min_price" type="number" class="form-control" placeholder="Min Price" value="{{ request()->min_price }}">
                 </div>
                 <div class="col-md-2">
@@ -150,6 +160,7 @@
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <tr><th width="20%">Name</th><td>{{$product->name}}</td></tr>
+                                <tr><th>Category</th><td>{{ $product->category ? $product->category->name : 'Uncategorized' }}</td></tr>
                                 <tr><th>Model</th><td>{{$product->model}}</td></tr>
                                 <tr><th>Code</th><td>{{$product->code}}</td></tr>
                                 <tr><th>Price</th><td>${{number_format($product->price, 2)}}</td></tr>

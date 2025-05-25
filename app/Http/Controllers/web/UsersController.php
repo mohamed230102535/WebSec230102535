@@ -5,6 +5,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use DB;
@@ -93,6 +94,65 @@ class UsersController extends Controller {
         $user->save();
         return view('users.verified', compact('user'));
        }
+
+    /**
+     * Show the user's profile page
+     */
+    public function profile()
+    {
+        $user = auth()->user();
+        return view('users.profile', compact('user'));
+    }
+    
+    /**
+     * Update the user's profile information
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = auth()->user();
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:255',
+        ]);
+        
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ]);
+        
+        return redirect()->route('profile')->with('success', 'Profile updated successfully!');
+    }
+    
+    /**
+     * Show the change password form
+     */
+    public function changePassword()
+    {
+        return view('users.change-password');
+    }
+    
+    /**
+     * Update the user's password
+     */
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|current_password',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+        
+        $user = auth()->user();
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+        
+        return redirect()->route('profile')->with('success', 'Password changed successfully!');
+    }
 
     public function login(Request $request) {
         return view('users.login');

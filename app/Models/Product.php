@@ -51,6 +51,14 @@ class Product extends Model  {
     }
     
     /**
+     * Get the category that owns the product.
+     */
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+    
+    /**
      * Get the count of reviews for this product.
      */
     public function getReviewsCountAttribute()

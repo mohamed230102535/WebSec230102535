@@ -8,6 +8,59 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Order extends Model
 {
     use HasFactory;
+    
+    // Order Status Constants
+    const STATUS_PENDING = 'pending';
+    const STATUS_PROCESSING = 'processing';
+    const STATUS_SHIPPED = 'shipped';
+    const STATUS_DELIVERED = 'delivered';
+    const STATUS_CANCELLED = 'cancelled';
+    
+    /**
+     * Get all available statuses
+     */
+    public static function getStatuses()
+    {
+        return [
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_PROCESSING => 'Processing',
+            self::STATUS_SHIPPED => 'Shipped',
+            self::STATUS_DELIVERED => 'Delivered',
+            self::STATUS_CANCELLED => 'Cancelled',
+        ];
+    }
+    
+    /**
+     * Get available next statuses based on current status
+     */
+    public function getNextStatuses()
+    {
+        $allStatuses = self::getStatuses();
+        
+        switch($this->status) {
+            case self::STATUS_PENDING:
+                return [
+                    self::STATUS_PROCESSING => $allStatuses[self::STATUS_PROCESSING],
+                    self::STATUS_CANCELLED => $allStatuses[self::STATUS_CANCELLED],
+                ];
+            case self::STATUS_PROCESSING:
+                return [
+                    self::STATUS_SHIPPED => $allStatuses[self::STATUS_SHIPPED],
+                    self::STATUS_CANCELLED => $allStatuses[self::STATUS_CANCELLED],
+                ];
+            case self::STATUS_SHIPPED:
+                return [
+                    self::STATUS_DELIVERED => $allStatuses[self::STATUS_DELIVERED],
+                    self::STATUS_CANCELLED => $allStatuses[self::STATUS_CANCELLED],
+                ];
+            case self::STATUS_DELIVERED:
+                return [];
+            case self::STATUS_CANCELLED:
+                return [];
+            default:
+                return $allStatuses;
+        }
+    }
 
     protected $fillable = [
         'order_number',

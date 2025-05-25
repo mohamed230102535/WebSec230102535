@@ -9,19 +9,33 @@ use App\Mail\VerificationEmail;
 use App\Http\Controllers\Web\Auth\AuthController;
 use App\Http\Controllers\Web\Auth\PagesController;
 use Illuminate\Support\Facades\DB;
-// Authentication Routes
 
-    // Regular Login/Register
+// Authentication and User Management Routes
+Route::prefix('users')->name('users.')->group(function() {
+    Route::get('', [UsersController::class, 'list'])->name('index');
+    Route::get('register', [UsersController::class, 'register'])->name('register');
+    Route::post('save', [UsersController::class, 'save'])->name('save');
+    Route::get('edit/{user?}', [UsersController::class, 'edit'])->name('edit');
+});
+
+// Auth Routes - these are the main login/logout routes
+Route::get('login', [AuthController::class, 'login'])->name('login');
+Route::post('login', [UsersController::class, 'doLogin'])->middleware('throttle:5,1')->name('do_login');
+Route::get('logout', [UsersController::class, 'doLogout'])->name('logout');
 Route::get('register', [UsersController::class, 'register'])->name('register');
 Route::post('register', [UsersController::class, 'doRegister'])->name('do_register');
-Route::post('login', [UsersController::class, 'doLogin'])
-->middleware('throttle:5,1')
-->name('do_login');
-Route::get('logout', [UsersController::class, 'doLogout'])->name('logout');
-// Auth Routes
-Route::get('login', [AuthController::class, 'login'])->name('login');
+
+// Social Login Routes
 Route::get('auth/github', [AuthController::class, 'redirectToGithub'])->name('github.login');
 Route::get('auth/github/callback', [AuthController::class, 'handleGithubCallback'])->name('github.callback');
+
+// User Profile Management Routes
+Route::middleware('auth')->group(function() {
+    Route::get('profile', [UsersController::class, 'profile'])->name('profile');
+    Route::post('profile', [UsersController::class, 'updateProfile'])->name('profile.update');
+    Route::get('change-password', [UsersController::class, 'changePassword'])->name('change-password');
+    Route::post('change-password', [UsersController::class, 'updatePassword'])->name('password.change');
+});
 
 Route::get('users', [UsersController::class, 'list'])->name('users');
 Route::get('profile/{user?}', [UsersController::class, 'profile'])->name('profile');
@@ -42,6 +56,14 @@ Route::get('ShowRestForm', [UsersController::class, 'showResetLink'])->name('Sho
 Route::post('/reset-password', [UsersController::class, 'resetPassword'])
     ->middleware('throttle:3,1')
     ->name('password.update');
+
+// Category Routes
+Route::prefix('categories')->name('categories.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Web\CategoryController::class, 'index'])->name('index');
+    Route::get('/edit/{category?}', [\App\Http\Controllers\Web\CategoryController::class, 'edit'])->name('edit');
+    Route::post('/save/{category?}', [\App\Http\Controllers\Web\CategoryController::class, 'save'])->name('save');
+    Route::get('/delete/{category}', [\App\Http\Controllers\Web\CategoryController::class, 'delete'])->name('delete');
+});
 
 Route::get('products', [ProductsController::class, 'list'])->name('products_list');
 Route::get('products/edit/{product?}', [ProductsController::class, 'edit'])->name('products_edit');

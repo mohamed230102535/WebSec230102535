@@ -41,6 +41,20 @@
                             </div>
                         </div>
 
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <select class="form-select" id="category_id" name="category_id">
+                                    <option value="">Select a category (optional)</option>
+                                    @foreach(\App\Models\Category::all() as $category)
+                                        <option value="{{ $category->id }}" {{ (isset($product->category_id) && $product->category_id == $category->id) ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <label for="category_id">Category</label>
+                            </div>
+                        </div>
+
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <input type="number" step="0.01" class="form-control" id="price" name="price" placeholder="Price" required value="{{$product->price ?? ''}}">

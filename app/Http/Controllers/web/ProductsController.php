@@ -22,7 +22,22 @@ class ProductsController extends Controller {
 
 	public function list(Request $request) {
 
-		$query = Product::select("products.*");
+		$query = Product::select("products.*")
+			->with('category') // Eager load categories
+			->withCount('reviews')
+			->withAvg('reviews', 'rating');
+
+		// Filter by category slug
+		$query->when($request->category, function($q) use ($request) {
+			$q->whereHas('category', function($query) use ($request) {
+				$query->where('slug', $request->category);
+			});
+		});
+
+		// Filter by category ID
+		$query->when($request->category_id, function($q) use ($request) {
+			$q->where('category_id', $request->category_id);
+		});
 
 		$query->when($request->keywords, 
 		fn($q)=> $q->where("name", "like", "%$request->keywords%"));
@@ -38,7 +53,10 @@ class ProductsController extends Controller {
 
 		$products = $query->get();
 
-		return view('products.list', compact('products'));
+		// Get all categories for the filter dropdown
+		$categories = \App\Models\Category::withCount('products')->get();
+
+		return view('products.list', compact('products', 'categories'));
 	}
 
 	public function edit(Request $request, Product $product = null) {
@@ -59,6 +77,7 @@ public function save(Request $request, Product $product = null) {
         'description' => ['nullable', 'string', 'max:1024'],
         'price' => ['required', 'numeric', 'min:0'],
         'stock' => ['required', 'integer', 'min:0'],
+        'category_id' => ['nullable', 'exists:categories,id'],
     ]);
 
     $product = $product ?? new Product();
