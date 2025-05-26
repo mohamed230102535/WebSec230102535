@@ -127,26 +127,46 @@
                     </div>
                 </div>
                 
-                @if(auth()->user()->can('manage_orders') && $order->status != 'cancelled')
+                @if(count($nextStatuses) > 0)
                 <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">Update Order Status</h6>
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-exchange-alt me-2"></i> Update Order Status</h6>
                     </div>
                     <div class="card-body">
+                        <div class="alert alert-info">
+                            <strong>Current Status:</strong> 
+                            @php
+                                $statusClass = [
+                                    'pending' => 'warning',
+                                    'processing' => 'info',
+                                    'shipped' => 'primary',
+                                    'delivered' => 'success',
+                                    'cancelled' => 'danger'
+                                ][$order->status] ?? 'secondary';
+                            @endphp
+                            <span class="badge bg-{{ $statusClass }}">{{ ucfirst($order->status) }}</span>
+                        </div>
+
                         <form action="{{ route('orders.update-status', $order->id) }}" method="POST" class="d-flex">
                             @csrf
                             <select name="status" class="form-select me-2">
-                                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Processing</option>
-                                <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
-                                <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered</option>
-                                <option value="cancelled">Cancel Order</option>
+                                @foreach($nextStatuses as $statusValue => $statusLabel)
+                                    <option value="{{ $statusValue }}" {{ $order->status == $statusValue ? 'selected' : '' }}>
+                                        {{ $statusLabel }}
+                                    </option>
+                                @endforeach
                             </select>
                             <button type="submit" class="btn btn-primary">Update Status</button>
                         </form>
+                        
+                        @if(array_key_exists(\App\Models\Order::STATUS_CANCELLED, $nextStatuses))
+                            <div class="mt-3 small text-muted">
+                                <i class="fas fa-info-circle me-1"></i> Cancelling an order will return items to inventory.
+                            </div>
+                        @endif
                     </div>
                 </div>
-                @elseif(auth()->user()->can('cancel_own_orders') && $order->status == 'pending' && auth()->id() == $order->user_id)
+                @elseif($order->status == 'pending' && auth()->id() == $order->user_id)
                 <div class="card">
                     <div class="card-body">
                         <form action="{{ route('orders.update-status', $order->id) }}" method="POST">

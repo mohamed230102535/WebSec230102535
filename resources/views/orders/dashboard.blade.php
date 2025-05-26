@@ -392,7 +392,7 @@
                                                 <td>{{ $user->email }}</td>
                                                 <td>{{ $user->created_at->diffForHumans() }}</td>
                                                 <td>
-                                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                                    <a href="{{ route('users_edit', $user->id) }}" class="btn btn-sm btn-outline-primary">View</a>
                                                 </td>
                                             </tr>
                                             @empty

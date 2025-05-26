@@ -41,28 +41,16 @@ class OrderController extends Controller
     }
 
     /**
-     * Display the specified order.
+     * Display a single order with details
      */
     public function show($id)
     {
         $order = Order::with(['items.product', 'user'])->findOrFail($id);
         
-        // Check if user has permission to view this order
-        if (auth()->id() === $order->user_id && auth()->user()->can('view_own_orders')) {
-            return view('orders.show', compact('order'));
-        } else if (auth()->user()->can('view_all_orders')) {
-            return view('orders.show', compact('order'));
-        }
+        // Since we're temporarily removing permission checks as requested,
+        // we'll proceed directly with enhanced order view
         
-        return redirect('/')->with('error', 'You do not have permission to view this order.');
-    }
-
-    /**
-     * Display a single order with details
-     */
-    public function show(Order $order)
-    {
-        $order->load(['items.product', 'user']);
+        // Get available next statuses for the order status workflow
         $nextStatuses = $order->getNextStatuses();
         
         return view('orders.show', compact('order', 'nextStatuses'));
@@ -70,12 +58,31 @@ class OrderController extends Controller
     
     /**
      * Update order status
+     * 
+     * @param Request $request
+     * @param Order|int $order
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function updateStatus(Request $request, Order $order)
+    public function updateStatus(Request $request, $order)
     {
+        // If $order is an ID, find the order
+        if (!($order instanceof Order)) {
+            $order = Order::findOrFail($order);
+        }
+        
+        // Validate the request
         $this->validate($request, [
             'status' => 'required|string|in:' . implode(',', array_keys(Order::getStatuses())),
         ]);
+        
+        // Check permissions
+        if (!auth()->user()->can('manage_orders') && 
+            !($order->user_id === auth()->id() && 
+              $request->status === 'cancelled' && 
+              $order->status === 'pending' && 
+              auth()->user()->can('cancel_own_orders'))) {
+            return back()->with('error', 'You do not have permission to update this order.');
+        }
         
         // Check if the requested status is a valid next status
         $nextStatuses = $order->getNextStatuses();
@@ -88,11 +95,18 @@ class OrderController extends Controller
         $order->save();
         
         // If the order is cancelled, return items to inventory
-        if ($request->status === Order::STATUS_CANCELLED && $oldStatus !== Order::STATUS_CANCELLED) {
+        if ($request->status === 'cancelled' && $oldStatus !== 'cancelled') {
             foreach ($order->items as $item) {
                 $product = $item->product;
                 $product->stock += $item->quantity;
                 $product->save();
+            }
+            
+            // If order was paid with credit system, refund the credit
+            if ($order->payment_method === 'credit_system') {
+                $user = $order->user;
+                $user->credit += $order->total_amount;
+                $user->save();
             }
         }
         
@@ -200,45 +214,5 @@ class OrderController extends Controller
         ));
     }
 
-    /**
-     * Update the order status.
-     */
-    public function updateStatus(Request $request, $id)
-    {
-        $this->validate($request, [
-            'status' => ['required', 'in:pending,processing,shipped,delivered,cancelled']
-        ]);
-        
-        $order = Order::findOrFail($id);
-        
-        // Check permissions
-        if (!auth()->user()->can('manage_orders') && 
-            !($order->user_id === auth()->id() && 
-              $request->status === 'cancelled' && 
-              $order->status === 'pending' && 
-              auth()->user()->can('cancel_own_orders'))) {
-            return back()->with('error', 'You do not have permission to update this order.');
-        }
-        
-        // If order is being cancelled and it was previously not cancelled, restore product stock
-        if ($request->status === 'cancelled' && $order->status !== 'cancelled') {
-            foreach ($order->items as $item) {
-                $product = $item->product;
-                $product->stock += $item->quantity;
-                $product->save();
-            }
-            
-            // If order was paid with credit system, refund the credit
-            if ($order->payment_method === 'credit_system') {
-                $user = $order->user;
-                $user->credit += $order->total_amount;
-                $user->save();
-            }
-        }
-        
-        $order->status = $request->status;
-        $order->save();
-        
-        return back()->with('success', 'Order status updated successfully.');
-    }
+    // Second updateStatus method was removed to fix the 'Cannot redeclare' error
 }

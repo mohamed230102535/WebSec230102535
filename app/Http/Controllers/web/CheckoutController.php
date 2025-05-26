@@ -45,10 +45,22 @@ class CheckoutController extends Controller
      */
     public function process(Request $request)
     {
+        // Validate request - modified to include all new form fields
         $this->validate($request, [
             'delivery_method' => ['required', 'in:home_delivery,store_pickup'],
             'payment_method' => ['required', 'in:credit_system,credit_card,paypal'],
-            'shipping_address' => ['required_if:delivery_method,home_delivery', 'nullable', 'string', 'max:500'],
+            
+            // Home delivery fields - only required when delivery method is home_delivery
+            'first_name' => ['required_if:delivery_method,home_delivery', 'nullable', 'string', 'max:100'],
+            'last_name' => ['required_if:delivery_method,home_delivery', 'nullable', 'string', 'max:100'],
+            'phone' => ['required_if:delivery_method,home_delivery', 'nullable', 'string', 'max:20'],
+            'email' => ['required_if:delivery_method,home_delivery', 'nullable', 'email'],
+            'street_address' => ['required_if:delivery_method,home_delivery', 'nullable', 'string', 'max:255'],
+            'address_line2' => ['nullable', 'string', 'max:255'],
+            'city' => ['required_if:delivery_method,home_delivery', 'nullable', 'string', 'max:100'],
+            'state' => ['required_if:delivery_method,home_delivery', 'nullable', 'string', 'max:50'],
+            'zip' => ['required_if:delivery_method,home_delivery', 'nullable', 'string', 'max:20'],
+            'delivery_notes' => ['nullable', 'string', 'max:500'],
         ]);
         
         $user = auth()->user();
@@ -90,7 +102,31 @@ class CheckoutController extends Controller
             $order->status = 'pending';
             $order->payment_method = $request->payment_method;
             $order->delivery_method = $request->delivery_method;
-            $order->shipping_address = $request->shipping_address;
+            
+            // Format shipping address based on delivery method
+            if ($request->delivery_method === 'home_delivery') {
+                // Format the full address from individual fields
+                $shippingAddress = "{$request->first_name} {$request->last_name}\n";
+                $shippingAddress .= "{$request->street_address}\n";
+                
+                if (!empty($request->address_line2)) {
+                    $shippingAddress .= "{$request->address_line2}\n";
+                }
+                
+                $shippingAddress .= "{$request->city}, {$request->state} {$request->zip}\n";
+                $shippingAddress .= "Phone: {$request->phone}\n";
+                $shippingAddress .= "Email: {$request->email}";
+                
+                if (!empty($request->delivery_notes)) {
+                    $shippingAddress .= "\n\nDelivery Notes: {$request->delivery_notes}";
+                }
+                
+                $order->shipping_address = $shippingAddress;
+            } else {
+                // Store pickup - no shipping address needed
+                $order->shipping_address = 'Store Pickup at WebSec Service Headquarters';
+            }
+            
             $order->save();
             
             // Create order items and update product stock

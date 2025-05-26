@@ -95,14 +95,8 @@ class UsersController extends Controller {
         return view('users.verified', compact('user'));
        }
 
-    /**
-     * Show the user's profile page
-     */
-    public function profile()
-    {
-        $user = auth()->user();
-        return view('users.profile', compact('user'));
-    }
+    // First profile method removed to fix 'Cannot redeclare' error
+    // Consolidated with the more comprehensive profile method below
     
     /**
      * Update the user's profile information
